@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ProductPrice extends Model
 {
@@ -20,16 +21,18 @@ class ProductPrice extends Model
 
     protected $casts = [
         'unit_price' => 'decimal:2',
+        'min_quantity' => 'integer',
+        'max_quantity' => 'integer',
         'effective_from' => 'date',
         'effective_to' => 'date',
     ];
 
-    public function product()
+    public function product(): BelongsTo
     {
         return $this->belongsTo(Product::class);
     }
 
-    public function customer()
+    public function customer(): BelongsTo
     {
         return $this->belongsTo(Customer::class);
     }
