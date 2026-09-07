@@ -26,4 +26,8 @@ class Customer extends Model
     return $this->belongsTo(User::class);
   }
 
+  public function prices(){
+    return $this->hasMany(ProductPrice::class);
+  }
+
 }

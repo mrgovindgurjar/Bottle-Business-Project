@@ -32,11 +32,11 @@
           <div class="hero-stage" id="heroStage">
             <div class="hero-ring ring-one"></div><div class="hero-ring ring-two"></div>
             <div class="floating-sample sample-one">
-              <img src="{{  asset('Website/img/taste-of-india.png') }}" alt="Restaurant branded bottle example">
+              <img src="{{  asset('website/img/taste-of-india.png') }}" alt="Restaurant branded bottle example">
               <div><b>Restaurant</b><span>custom label</span></div>
             </div>
             <div class="floating-sample sample-two">
-              <img src="{{ asset('Website/img/public-house.png') }}" alt="Premium restaurant branded bottle example">
+              <img src="{{ asset('website/img/public-house.png') }}" alt="Premium restaurant branded bottle example">
               <div><b>Hospitality</b><span>front + back label</span></div>
             </div>
 
@@ -136,7 +136,7 @@
         <p>These examples show the direction of the finished product. Your actual artwork is discussed, refined and approved with our team before production.</p>
       </div>
       <div class="showcase-main reveal tilt-card">
-        <div class="showcase-photo"><img src="{{  asset('Website/img/taste-of-india.png') }}" alt="Taste of India branded water bottle example"><span class="showcase-tag">FOOD BRANDING</span></div>
+        <div class="showcase-photo"><img src="{{  asset('website/img/taste-of-india.png') }}" alt="Taste of India branded water bottle example"><span class="showcase-tag">FOOD BRANDING</span></div>
         <div class="showcase-detail">
           <span class="eyebrow">CUSTOM FRONT + BACK LABEL</span>
           <h3>Your bottle can carry the brand story, not just the logo.</h3>
@@ -146,7 +146,7 @@
       </div>
       <div class="showcase-secondary">
         <div class="secondary-copy reveal"><span class="eyebrow">HOSPITALITY EXAMPLE</span><h3>Front label for impact.<br>Back label for information.</h3><p>A premium black-and-gold treatment can make the same bottle feel completely different.</p></div>
-        <div class="secondary-photo reveal tilt-card"><img src="{{  asset('Website/img/public-house.png') }}" alt="The Public House branded water bottle example"></div>
+        <div class="secondary-photo reveal tilt-card"><img src="{{  asset('website/img/public-house.png') }}" alt="The Public House branded water bottle example"></div>
       </div>
     </div>
   </section>

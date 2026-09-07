@@ -24,7 +24,7 @@
   <div class="container">
     <a class="navbar-brand brand" href="#home">
         <!-- <span class="brand-icon">J</span>al<span>Van</span> -->
-         <img src="{{ asset('Website/img/logo.png') }}" alt="" height="80px" width="160px">
+         <img src="{{ asset('website/img/logo.png') }}" alt="" height="80px" width="160px">
     </a>
     <button class="navbar-toggler border-0 shadow-none" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
     <div class="collapse navbar-collapse" id="nav">
