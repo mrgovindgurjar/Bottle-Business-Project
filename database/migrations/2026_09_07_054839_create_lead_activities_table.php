@@ -6,38 +6,47 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-       Schema::create('lead_activities', function (Blueprint $table) {
-    $table->id();
+        Schema::create('lead_activities', function (Blueprint $table) {
 
-    $table->foreignId('lead_id')
-        ->constrained('leads')
-        ->cascadeOnDelete();
+            $table->id();
 
-    $table->foreignId('user_id')
-        ->nullable()
-        ->constrained('users')
-        ->nullOnDelete();
+            $table->foreignId('lead_id')
+                ->constrained('leads')
+                ->cascadeOnDelete();
 
-    $table->string('type', 50);
+            $table->foreignId('user_id')
+                ->nullable()
+                ->constrained('users')
+                ->nullOnDelete();
 
-    $table->text('description')->nullable();
+            $table->string('type', 50);
 
-    $table->dateTime('activity_at')->nullable();
+            $table->string('subject', 200)
+                ->nullable();
 
-    $table->dateTime('next_followup_at')->nullable();
+            $table->text('description');
 
-    $table->timestamps();
-});
+            $table->dateTime('activity_at');
+
+            $table->dateTime('next_followup_at')
+                ->nullable();
+
+            $table->json('metadata')
+                ->nullable();
+
+            $table->timestamps();
+
+            $table->index([
+                'lead_id',
+                'activity_at'
+            ]);
+
+            $table->index('type');
+        });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
         Schema::dropIfExists('lead_activities');

@@ -41,17 +41,66 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
-    protected function casts(): array
-    {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
-    }
+
+   protected function casts(): array
+{
+    return [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+        'is_active' => 'boolean',
+        'last_login_at' => 'datetime',
+    ];
+}
 
     public function customer(): HasOne
     {
         return $this->HasOne(Customer::class);
     }
  
+    public function roles()
+{
+    return $this->belongsToMany(
+        Role::class,
+        'user_roles'
+    );
 }
+
+public function leads()
+{
+    return $this->hasMany(
+        Lead::class,
+        'assigned_to'
+    );
+}
+
+public function leadActivities()
+{
+    return $this->hasMany(
+        LeadActivity::class
+    );
+}
+ public function hasPermission(string $permission): bool
+{
+    if (
+        $this->roles()
+            ->where('slug', 'super-admin')
+            ->exists()
+    ) {
+        return true;
+    }
+
+    return $this->roles()
+        ->whereHas(
+            'permissions',
+            function ($query) use ($permission) {
+                $query->where(
+                    'slug',
+                    $permission
+                );
+            }
+        )
+        ->exists();
+}
+
+}
+    

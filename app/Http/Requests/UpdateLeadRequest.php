@@ -2,27 +2,25 @@
 
 namespace App\Http\Requests;
 
-use Illuminate\Contracts\Validation\ValidationRule;
+use App\Models\Lead;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateLeadRequest extends FormRequest
 {
-    /**
-     * Determine if the user is authorized to make this request.
-     */
     public function authorize(): bool
     {
-        return true;
+        return $this->user()
+            ->can(
+                'update',
+                $this->route('lead')
+            );
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
     public function rules(): array
     {
         return [
+
             'business_name' => [
                 'required',
                 'string',
@@ -44,7 +42,7 @@ class UpdateLeadRequest extends FormRequest
             'email' => [
                 'nullable',
                 'email',
-                'max:150',
+                'max:190',
             ],
 
             'business_type' => [
@@ -70,6 +68,18 @@ class UpdateLeadRequest extends FormRequest
                 'min:1',
             ],
 
+            'quantity_unit' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
+            'order_frequency' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
             'estimated_value' => [
                 'nullable',
                 'numeric',
@@ -82,9 +92,8 @@ class UpdateLeadRequest extends FormRequest
             ],
 
             'status' => [
-                'nullable',
-                'string',
-                'max:50',
+                'required',
+                Rule::in(Lead::STATUSES),
             ],
 
             'next_followup_at' => [
@@ -92,7 +101,36 @@ class UpdateLeadRequest extends FormRequest
                 'date',
             ],
 
+            'address' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
+
+            'city' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'state' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'pincode' => [
+                'nullable',
+                'string',
+                'max:10',
+            ],
+
             'notes' => [
+                'nullable',
+                'string',
+            ],
+
+            'lost_reason' => [
                 'nullable',
                 'string',
             ],

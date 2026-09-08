@@ -2,18 +2,22 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Lead;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class StoreLeadRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()
+            ->can('create', Lead::class);
     }
 
     public function rules(): array
     {
         return [
+
             'business_name' => [
                 'required',
                 'string',
@@ -35,7 +39,7 @@ class StoreLeadRequest extends FormRequest
             'email' => [
                 'nullable',
                 'email',
-                'max:150',
+                'max:190',
             ],
 
             'business_type' => [
@@ -61,6 +65,18 @@ class StoreLeadRequest extends FormRequest
                 'min:1',
             ],
 
+            'quantity_unit' => [
+                'nullable',
+                'string',
+                'max:30',
+            ],
+
+            'order_frequency' => [
+                'nullable',
+                'string',
+                'max:50',
+            ],
+
             'estimated_value' => [
                 'nullable',
                 'numeric',
@@ -74,13 +90,36 @@ class StoreLeadRequest extends FormRequest
 
             'status' => [
                 'nullable',
-                'string',
-                'max:50',
+                Rule::in(Lead::STATUSES),
             ],
 
             'next_followup_at' => [
                 'nullable',
                 'date',
+            ],
+
+            'address' => [
+                'nullable',
+                'string',
+                'max:500',
+            ],
+
+            'city' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'state' => [
+                'nullable',
+                'string',
+                'max:100',
+            ],
+
+            'pincode' => [
+                'nullable',
+                'string',
+                'max:10',
             ],
 
             'notes' => [
