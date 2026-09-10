@@ -24,6 +24,9 @@
         'resources/js/admin.js'
     ])
 
+    @stack('styles')
+    @stack('scripts')
+
 </head>
 
 
@@ -190,8 +193,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.customers.index') }}"
+                class="nav-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -284,8 +287,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.pricing.index') }}"
+                class="nav-item {{ request()->routeIs('admin.pricing.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -317,8 +320,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.designs.index') }}"
+                class="nav-item {{ request()->routeIs('admin.designs.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">

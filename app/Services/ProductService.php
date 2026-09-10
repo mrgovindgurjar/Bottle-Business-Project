@@ -3,13 +3,21 @@
 namespace App\Services;
 
 use App\Models\Product;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 class ProductService
 {
     public function create(array $data): Product
     {
         return DB::transaction(function () use ($data) {
+            $image = $data['image'] ?? null;
+            unset($data['image']);
+
+            if ($image instanceof UploadedFile) {
+                $data['image_path'] = $image->store('products', 'public');
+            }
 
             return Product::create($data);
         });
@@ -17,19 +25,26 @@ class ProductService
 
     public function update(Product $product, array $data): Product
     {
-        $product->update($data);
+        return DB::transaction(function () use ($product, $data) {
+            $image = $data['image'] ?? null;
+            unset($data['image']);
 
-        return $product->fresh();
+            if ($image instanceof UploadedFile) {
+                if ($product->image_path) {
+                    Storage::disk('public')->delete($product->image_path);
+                }
+
+                $data['image_path'] = $image->store('products', 'public');
+            }
+
+            $product->update($data);
+
+            return $product->fresh();
+        });
     }
 
     public function delete(Product $product): void
     {
-        /*
-         * Production mein directly delete karne ki jagah
-         * inactive karna safer hai.
-         */
-        $product->update([
-            'status' => 'inactive',
-        ]);
+        $product->update(['status' => 'inactive']);
     }
 }

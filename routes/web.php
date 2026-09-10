@@ -3,12 +3,16 @@
 use App\Http\Controllers\Admin\Auth\AdminLoginController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\Admin\CustomerController;
 
-use App\Http\Controllers\Admin\ProduLeadControllerctController;
+use App\Http\Controllers\Admin\ProductController;
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\WebsiteController;
-use App\Http\Controllers\Customer\DashboardController as CustomerController;
+use App\Http\Controllers\Customer\DashboardController as CustomerPortalController;
+ use App\Http\Controllers\Admin\ProductPriceController;
+use App\Http\Controllers\Admin\PricingController;
+
 Route::prefix('admin')
     ->name('admin.')
     ->group(function () {
@@ -45,6 +49,33 @@ Route::prefix('admin')
                 '/products',
                 [ProductController::class, 'index']
             )->name('products.index');
+
+            Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+            Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
+            Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+            Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+            Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
+            Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+            Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+
+            Route::post('/customers/{customer}/addresses', [CustomerController::class, 'storeAddress'])->name('customers.addresses.store');
+            Route::put('/customers/{customer}/addresses/{address}', [CustomerController::class, 'updateAddress'])->name('customers.addresses.update');
+            Route::delete('/customers/{customer}/addresses/{address}', [CustomerController::class, 'destroyAddress'])->name('customers.addresses.destroy');
+            Route::post('/customers/{customer}/addresses/{address}/default', [CustomerController::class, 'setDefaultAddress'])->name('customers.addresses.default');
+
+             Route::get('/products', [ProductController::class, 'index'])->name('products.index');
+            Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
+            Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+            Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
+            Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
+            Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
+            Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
+
+            Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+            Route::post('/products/{product}/prices', [ProductPriceController::class, 'store'])->name('products.prices.store');
+            Route::put('/product-prices/{productPrice}', [ProductPriceController::class, 'update'])->name('products.prices.update');
+            Route::delete('/product-prices/{productPrice}', [ProductPriceController::class, 'destroy'])->name('products.prices.destroy');
+
 
         });
 
@@ -114,8 +145,10 @@ Route::prefix('admin')
         */
 
         Route::get('/', [WebsiteController::class,'index']);
-        Route::get('/customer-dashboard', [CustomerController::class,'index'])->name('customer.main');
+        Route::get('/customer-dashboard', [CustomerPortalController::class,'index'])->name('customer.main');
 
         
 
 // require __DIR__ . '/auth.php';
+
+ require __DIR__.'/design-studio.php';

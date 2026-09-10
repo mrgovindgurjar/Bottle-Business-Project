@@ -8,15 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class ProductPrice extends Model
 {
     protected $fillable = [
-        'product_id',
-        'customer_id',
-        'pricing_type',
-        'min_quantity',
-        'max_quantity',
-        'unit_price',
-        'effective_from',
-        'effective_to',
-        'status',
+        'product_id','customer_id','pricing_type','min_quantity','max_quantity',
+        'unit_price','effective_from','effective_to','status',
     ];
 
     protected $casts = [
@@ -27,13 +20,6 @@ class ProductPrice extends Model
         'effective_to' => 'date',
     ];
 
-    public function product(): BelongsTo
-    {
-        return $this->belongsTo(Product::class);
-    }
-
-    public function customer(): BelongsTo
-    {
-        return $this->belongsTo(Customer::class);
-    }
+    public function product(): BelongsTo { return $this->belongsTo(Product::class); }
+    public function customer(): BelongsTo { return $this->belongsTo(Customer::class); }
 }

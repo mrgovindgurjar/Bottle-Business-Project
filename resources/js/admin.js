@@ -263,3 +263,61 @@ document.addEventListener('DOMContentLoaded', () => {
     );
 
 });
+/* =========================================================
+ | PRODUCT MODULE
+========================================================= */
+
+(() => {
+    const input = document.querySelector('[data-product-image-input]');
+    const upload = document.querySelector('[data-product-upload]');
+    const preview = document.querySelector('[data-product-preview]');
+
+    upload?.addEventListener('click', () => input?.click());
+
+    input?.addEventListener('change', () => {
+        const file = input.files?.[0];
+        if (!file || !preview) return;
+        const url = URL.createObjectURL(file);
+        preview.innerHTML = `<img src="${url}" alt="Product preview">`;
+    });
+
+    document.querySelectorAll('[data-confirm-form]').forEach((form) => {
+        form.addEventListener('submit', (event) => {
+            const message = form.dataset.confirmMessage || 'Are you sure?';
+            if (!window.confirm(message)) event.preventDefault();
+        });
+    });
+
+    document.querySelectorAll('.product-filter-form input[name="search"]').forEach((search) => {
+        let timer;
+        search.addEventListener('input', () => {
+            clearTimeout(timer);
+            timer = setTimeout(() => {
+                if (search.value.length >= 3 || search.value.length === 0) {
+                    search.form?.requestSubmit();
+                }
+            }, 500);
+        });
+    });
+
+    document.querySelectorAll('[data-price-edit-toggle]').forEach((button) => {
+        button.addEventListener('click', () => {
+            const target = document.querySelector(button.dataset.priceEditToggle);
+            if (!target) return;
+            target.classList.toggle('open');
+            button.textContent = target.classList.contains('open') ? 'Close' : 'Edit';
+        });
+    });
+
+    document.querySelectorAll('[data-price-form]').forEach((form) => {
+        const min = form.querySelector('[name="min_quantity"]');
+        const max = form.querySelector('[name="max_quantity"]');
+        max?.addEventListener('blur', () => {
+            if (min?.value && max.value && Number(max.value) < Number(min.value)) {
+                max.setCustomValidity('Maximum quantity must be greater than or equal to minimum quantity.');
+            } else {
+                max.setCustomValidity('');
+            }
+        });
+    });
+})();
