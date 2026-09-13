@@ -155,8 +155,30 @@ window.JALVAN_ASSET_BASE = @json($assetBase);
 </script>
 @endsection
 
-@push('scripts')
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+ {{-- <script>
+    window.JALVAN_DESIGN = @json([
+        'design'  => $design->only(['id', 'design_code', 'status', 'design_type']), 
+        'version' => $version?->only(['id', 'version_no', 'name', 'design_data', 'logo_path', 'status', 'change_note'])
+    ]);
+</script>
+
 <script src="{{ asset('js/design-studio.js') }}"></script>
-@endpush
+<link rel="stylesheet" href="{{ asset('css/design-studio.css') }}"> --}}
+
+
+<!-- 1. Define the PHP payload cleanly at the top -->
+@php
+    $jalvanDesignPayload = [
+        'design' => $design->only(['id', 'design_code', 'status', 'design_type']),
+        'version' => $version?->only(['id', 'version_no', 'name', 'design_data', 'logo_path', 'status', 'change_note']),
+    ];
+@endphp
+
+<!-- 2. Safely output the payload to JavaScript using Illuminate\Support\Js -->
+<script>
+    window.JALVAN_DESIGN = {!! \Illuminate\Support\Js::from($jalvanDesignPayload) !!};
+</script>
+
+<!-- 3. Assets placed cleanly without text interruptions -->
+<script src="{{ asset('js/design-studio.js') }}"></script>
+<link rel="stylesheet" href="{{ asset('css/design-studio.css') }}">
