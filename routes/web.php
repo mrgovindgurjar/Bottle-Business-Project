@@ -152,3 +152,24 @@ Route::prefix('admin')
 // require __DIR__ . '/auth.php';
 
  require __DIR__.'/design-studio.php';
+
+ require __DIR__.'/quotation.php';
+
+ require __DIR__ . '/orders.php';
+
+require __DIR__ . '/production.php';
+
+require __DIR__ . '/batches.php';
+
+require __DIR__ . '/inventory.php';
+require __DIR__ . '/procurement.php';
+require __DIR__ . '/deliveries.php';
+require __DIR__ . '/payments.php';
+require __DIR__ . '/invoices.php';
+require __DIR__ . '/income_expenses.php';
+require __DIR__ . '/income_expense_categories.php';
+require __DIR__ . '/staff_attendance.php';
+
+
+
+ 

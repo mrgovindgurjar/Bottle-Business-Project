@@ -1,0 +1,4 @@
+<?php
+namespace Database\Seeders;
+use Illuminate\Database\Seeder; use App\Models\Permission;
+class InvoicePermissionSeeder extends Seeder { public function run():void { foreach([['View Invoices','invoices.view','view'],['View All Invoices','invoices.view_all','view_all'],['Create Invoices','invoices.create','create'],['Edit Invoices','invoices.edit','edit'],['Delete Invoices','invoices.delete','delete'],['Issue Invoices','invoices.issue','issue'],['Send Invoices','invoices.send','send'],['Cancel Invoices','invoices.cancel','cancel'],['Duplicate Invoices','invoices.duplicate','duplicate'],['Export Invoices','invoices.export','export'],['Print Invoices','invoices.print','print'],['PDF Invoices','invoices.pdf','pdf']] as [$name,$slug,$action]) Permission::updateOrCreate(['slug'=>$slug],['name'=>$name,'module'=>'invoices','action'=>$action]); } }

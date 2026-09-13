@@ -1,0 +1,28 @@
+<?php
+namespace App\Services;
+use App\Models\Order;
+use App\Models\ProductionOrder;
+use App\Models\ProductionStep;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
+class ProductionService {
+ public function createFromOrder(Order $order,int $userId):ProductionOrder{return DB::transaction(function()use($order,$userId){
+  $order=Order::query()->with('items')->lockForUpdate()->findOrFail($order->id);
+  if(!in_array($order->status,['confirmed','in_production','on_hold'],true)) throw ValidationException::withMessages(['order'=>'Only confirmed/on-hold orders can enter production.']);
+  $existing=ProductionOrder::where('order_id',$order->id)->whereNotIn('status',['cancelled'])->latest('id')->lockForUpdate()->first();
+  if($existing)return $existing->fresh(['items','steps','order','customer','design']);
+  $planned=(float)$order->items->sum(fn($i)=>(float)$i->quantity);
+  $p=ProductionOrder::create(['production_number'=>$this->generateNumber(),'order_id'=>$order->id,'customer_id'=>$order->customer_id,'design_id'=>$order->design_id,'planned_quantity'=>$planned,'status'=>'pending','created_by'=>$userId]);
+  foreach($order->items as $i=>$item){$p->items()->create(['order_item_id'=>$item->id,'product_id'=>$item->product_id,'design_id'=>$item->design_id,'description'=>$item->description,'planned_quantity'=>$item->quantity,'unit'=>$item->unit,'sort_order'=>$i,'metadata'=>$item->metadata]);}
+  foreach($this->defaultSteps() as $i=>$step){$p->steps()->create(['code'=>$step[0],'name'=>$step[1],'sort_order'=>$i,'status'=>'pending']);}
+  if($order->status!=='in_production')$order->update(['status'=>'in_production']);
+  return $p->fresh(['items.product','steps','order','customer','design']);
+ });}
+ public function update(ProductionOrder $p,array $data):ProductionOrder{return DB::transaction(function()use($p,$data){if(!$p->isActive())throw ValidationException::withMessages(['production'=>'Completed/cancelled production cannot be edited.']);$p->update($data);return $p->fresh(['items.product','steps','order','customer','design','assignee']);});}
+ public function changeStatus(ProductionOrder $p,string $status,int $userId):ProductionOrder{return DB::transaction(function()use($p,$status,$userId){$allowed=['pending'=>['scheduled','in_progress','on_hold','cancelled'],'scheduled'=>['in_progress','on_hold','cancelled'],'in_progress'=>['quality_check','on_hold','cancelled'],'quality_check'=>['completed','in_progress','on_hold'],'on_hold'=>['scheduled','in_progress','cancelled'],'completed'=>[],'cancelled'=>[]];if(!in_array($status,$allowed[$p->status]??[],true))throw ValidationException::withMessages(['production'=>"Cannot move production from {$p->status} to {$status}."]);$payload=['status'=>$status];if($status==='in_progress'&&!$p->started_at)$payload['started_at']=now();if($status==='completed'){$this->assertCompletable($p);$payload['completed_at']=now();$payload['completed_by']=$userId;$payload['quality_status']='passed';}$p->update($payload);if($status==='completed'&&$p->order&&$p->order->status==='in_production')$p->order->update(['status'=>'ready']);return $p->fresh(['steps','items','order']);});}
+ public function updateProgress(ProductionOrder $p,array $data):ProductionOrder{return DB::transaction(function()use($p,$data){if(!in_array($p->status,['in_progress','quality_check'],true))throw ValidationException::withMessages(['production'=>'Progress can be updated only while production is active or in quality check.']);$planned=(float)$p->planned_quantity;$produced=max(0,(float)$data['produced_quantity']);$rejected=max(0,(float)($data['rejected_quantity']??0));$waste=max(0,(float)($data['waste_quantity']??0));if($produced+$rejected>$planned)throw ValidationException::withMessages(['produced_quantity'=>'Produced + rejected quantity cannot exceed planned quantity.']);$p->update(['produced_quantity'=>$produced,'rejected_quantity'=>$rejected,'waste_quantity'=>$waste]);return $p->fresh();});}
+ public function updateStep(ProductionStep $step,string $status):ProductionStep{if(!in_array($status,['pending','in_progress','completed','skipped'],true))throw ValidationException::withMessages(['step'=>'Invalid production step status.']);$payload=['status'=>$status];if($status==='in_progress'&&!$step->started_at)$payload['started_at']=now();if(in_array($status,['completed','skipped'],true))$payload['completed_at']=now();$step->update($payload);return $step->fresh();}
+ public function generateNumber():string{$year=(int)now()->format('Y');$row=DB::table('production_sequences')->where('year',$year)->lockForUpdate()->first();if(!$row){DB::table('production_sequences')->insert(['year'=>$year,'last_number'=>1,'created_at'=>now(),'updated_at'=>now()]);$n=1;}else{$n=((int)$row->last_number)+1;DB::table('production_sequences')->where('id',$row->id)->update(['last_number'=>$n,'updated_at'=>now()]);}return 'PROD-'.$year.'-'.str_pad((string)$n,6,'0',STR_PAD_LEFT);}
+ private function assertCompletable(ProductionOrder $p):void{$planned=(float)$p->planned_quantity;$done=(float)$p->produced_quantity+(float)$p->rejected_quantity;if($done<$planned)throw ValidationException::withMessages(['production'=>'Production cannot be completed until planned quantity is accounted for.']);if($p->quality_status==='failed')throw ValidationException::withMessages(['quality_status'=>'Quality check failed. Pass quality before completing production.']);}
+ private function defaultSteps():array{return [['artwork_check','Artwork Check'],['printing','Label Printing'],['bottle_prep','Bottle Preparation'],['filling','Water Filling'],['capping','Capping'],['labeling','Label Application'],['quality_check','Quality Check'],['packing','Packing']];}
+}

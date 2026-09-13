@@ -113,4 +113,23 @@ class Customer extends Model
             default => ucfirst($this->status),
         };
     }
+
+    public function batchAllocations()
+{
+    return $this->hasMany(\App\Models\BatchAllocation::class);
+}
+
+public function deliveries(): HasMany { return $this->hasMany(Delivery::class); }
+
+public function payments(): HasMany
+{
+    return $this->hasMany(Payment::class);
+}
+
+public function invoice(): HasMany
+{
+    return $this->hasMany(Invoice::class);
+}
+
+
 }

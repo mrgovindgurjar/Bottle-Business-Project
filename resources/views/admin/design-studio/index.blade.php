@@ -4,11 +4,8 @@
 @section('page_title','Design Studio')
 @section('breadcrumb') CRM / Design Studio @endsection
 
-@push('styles')    
-    <link rel="stylesheet" href="{{ asset('css/design-studio.css') }}">
-@endpush
-@push('scripts')    
-    <script src="{{ asset('js/design-studio.js') }}"></script>
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/design-studio.css') }}">
 @endpush
 
 @section('content')
@@ -50,3 +47,7 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+ <script src="{{ asset('js/design-studio.js') }}"></script>
+@endpush

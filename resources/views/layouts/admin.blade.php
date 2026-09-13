@@ -214,8 +214,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.quotations.index') }}"
+                class="nav-item {{ request()->routeIs('admin.quotations.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -234,8 +234,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.orders.index') }}"
+                class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -339,8 +339,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.production.index') }}"
+                class="nav-item  {{ request()->routeIs('admin.production.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -359,8 +359,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.batches.index') }}"
+                class="nav-item {{ request()->routeIs('admin.batches.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -384,8 +384,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.inventory.index') }}"
+                class="nav-item {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -405,6 +405,58 @@
 
             </a>
 
+             {{-- PROCUREMENT --}}
+
+            <div class="nav-section">
+
+                <span>
+                    PROCUREMENT
+                </span>
+
+            </div>
+
+
+            <a
+                href="{{ route('admin.suppliers.index') }}"
+                class="nav-item {{ request()->routeIs('admin.suppliers.*') ? 'active' : '' }}"
+            >
+
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 6h11v11H3z"/>
+                        <path d="M14 10h4l3 3v4h-7z"/>
+                        <circle cx="7" cy="19" r="2"/>
+                        <circle cx="18" cy="19" r="2"/>
+                    </svg>
+                </span>
+
+                <span class="nav-label">
+                    Suppliers
+                </span>
+
+            </a>
+
+             <a
+                href="{{ route('admin.purchases.index') }}"
+                class="nav-item {{ request()->routeIs('admin.purchases.*') ? 'active' : '' }}"
+            >
+
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 6h11v11H3z"/>
+                        <path d="M14 10h4l3 3v4h-7z"/>
+                        <circle cx="7" cy="19" r="2"/>
+                        <circle cx="18" cy="19" r="2"/>
+                    </svg>
+                </span>
+
+                <span class="nav-label">
+                    Purchases
+                </span>
+
+            </a>
+
+
 
             {{-- DELIVERY --}}
 
@@ -418,8 +470,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.deliveries.index') }}"
+                class="nav-item {{ request()->routeIs('admin.deliveries.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -450,8 +502,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.payments.index') }}"
+                class="nav-item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -470,8 +522,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.invoices.index') }}"
+                class="nav-item {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -491,8 +543,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.income-expenses.index') }}"
+                class="nav-item {{ request()->routeIs('admin.income-expenses.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -510,6 +562,26 @@
 
             </a>
 
+            <a
+                href="{{ route('admin.income-expenses.categories.index') }}"
+                class="nav-item {{ request()->routeIs('admin.income-expenses.categories.*') ? 'active' : '' }}"
+            >
+
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 20V10"/>
+                        <path d="M10 20V4"/>
+                        <path d="M16 20v-7"/>
+                        <path d="M22 20H2"/>
+                    </svg>
+                </span>
+
+                <span class="nav-label">
+                    Categories
+                </span>
+
+            </a>
+
 
             {{-- PEOPLE --}}
 
@@ -523,8 +595,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.staff.index') }}"
+                class="nav-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -542,8 +614,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.attendance.index') }}"
+                class="nav-item {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">

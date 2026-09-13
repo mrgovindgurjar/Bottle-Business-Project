@@ -1,0 +1,1 @@
+document.addEventListener('DOMContentLoaded',()=>{document.querySelectorAll('form').forEach(form=>form.addEventListener('submit',()=>{const b=form.querySelector('button[type="submit"]:not(.danger),button:not(.danger)');if(b){b.disabled=true;b.dataset.original=b.textContent;b.textContent='Saving…';}}));});

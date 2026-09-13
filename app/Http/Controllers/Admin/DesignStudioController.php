@@ -13,6 +13,7 @@ use App\Models\DesignVersion;
 use App\Models\Product;
 use App\Services\DesignStudioService;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 
 class DesignStudioController extends Controller
 {
@@ -21,11 +22,14 @@ class DesignStudioController extends Controller
     public function index(Request $request)
     {
         $this->authorize('viewAny', DesignRequest::class);
-        $query = DesignRequest::with(['customer','product'])->latest();
+        $query = DesignRequest::with(['customer','product','versions'])->latest();
         if ($request->filled('q')) {
             $q = $request->string('q')->toString();
-            $query->where(fn($x) => $x->where('design_code','like',"%$q%")->orWhere('title','like',"%$q%"))
-                ->orWhereHas('customer', fn($x) => $x->where('business_name','like',"%$q%"));
+            $query->where(function ($x) use ($q) {
+                $x->where('design_code', 'like', "%$q%")
+                  ->orWhere('title', 'like', "%$q%")
+                  ->orWhereHas('customer', fn ($c) => $c->where('business_name', 'like', "%$q%"));
+            });
         }
         if ($request->filled('status')) $query->where('status', $request->string('status'));
         if ($request->filled('type')) $query->where('design_type', $request->string('type'));
@@ -98,9 +102,32 @@ class DesignStudioController extends Controller
     {
         $this->authorize('update', $design);
         abort_unless($version->design_request_id === $design->id, 404);
-        $request->validate(['logo' => ['required','image','mimes:png,jpg,jpeg,webp,svg','max:4096']]);
+        $request->validate(['logo' => ['required','file','mimes:png,jpg,jpeg,webp,svg','max:4096']]);
         $this->service->uploadLogo($version, $request->file('logo'));
         return back()->with('success','Logo uploaded.');
+    }
+
+    public function artwork(Request $request, DesignRequest $design, DesignVersion $version): JsonResponse
+    {
+        $this->authorize('update', $design);
+        abort_unless($version->design_request_id === $design->id, 404);
+
+        $request->validate([
+            'front_artwork' => ['nullable','file','mimes:png,jpg,jpeg,webp','max:6144'],
+            'back_artwork' => ['nullable','file','mimes:png,jpg,jpeg,webp','max:6144'],
+        ]);
+
+        $updated = $this->service->uploadArtwork(
+            $version,
+            $request->file('front_artwork'),
+            $request->file('back_artwork')
+        );
+
+        return response()->json([
+            'success' => true,
+            'front_artwork_path' => $updated->front_artwork_path,
+            'back_artwork_path' => $updated->back_artwork_path,
+        ]);
     }
 
     public function submit(DesignRequest $design, DesignVersion $version)

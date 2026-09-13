@@ -1,0 +1,6 @@
+(function(){
+ const d=document;
+ function money(n){return '₹ '+(Number(n||0)).toLocaleString('en-IN',{minimumFractionDigits:2,maximumFractionDigits:2});}
+ function sync(){const dir=d.getElementById('pm-direction');const c=d.getElementById('pm-customer');const s=d.getElementById('pm-supplier');if(!dir)return; const paid=dir.value==='paid'; if(c)c.style.display=paid?'none':''; if(s)s.style.display=paid?'':'none'; const amount=Number((d.querySelector('[name="amount"]')||{}).value||0); const a=Number((d.getElementById('pm-allocated')||{}).dataset?.value||0); const total=d.getElementById('pm-total'),un=d.getElementById('pm-unallocated'); if(total)total.textContent=money(amount); if(un)un.textContent=money(Math.max(0,amount-a));}
+ d.addEventListener('DOMContentLoaded',function(){sync(); const dir=d.getElementById('pm-direction'); const amount=d.querySelector('[name="amount"]'); if(dir)dir.addEventListener('change',sync); if(amount)amount.addEventListener('input',sync); const method=d.getElementById('pm-method'); const ref=d.querySelector('[name="reference_number"]'); if(method&&ref){method.addEventListener('change',()=>{ref.placeholder=['upi','bank_transfer','neft','rtgs','imps','card'].includes(method.value)?'Reference / UTR':'Reference'});}});
+})();

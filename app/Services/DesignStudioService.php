@@ -63,6 +63,26 @@ class DesignStudioService
         return $version->fresh();
     }
 
+    public function uploadArtwork(DesignVersion $version, ?UploadedFile $front = null, ?UploadedFile $back = null): DesignVersion
+    {
+        if ($front) {
+            if ($version->front_artwork_path) {
+                Storage::disk('public')->delete($version->front_artwork_path);
+            }
+            $version->front_artwork_path = $front->store('design-studio/artwork/front', 'public');
+        }
+
+        if ($back) {
+            if ($version->back_artwork_path) {
+                Storage::disk('public')->delete($version->back_artwork_path);
+            }
+            $version->back_artwork_path = $back->store('design-studio/artwork/back', 'public');
+        }
+
+        $version->save();
+        return $version->fresh();
+    }
+
     public function submit(DesignRequest $request, DesignVersion $version): void
     {
         if ($version->status === 'approved') {

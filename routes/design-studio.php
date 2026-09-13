@@ -12,6 +12,7 @@ Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::put('/design-studio/{design}/versions/{version}', [DesignStudioController::class, 'save'])->name('designs.save');
     Route::post('/design-studio/{design}/versions/{version}/new', [DesignStudioController::class, 'newVersion'])->name('designs.new-version');
     Route::post('/design-studio/{design}/versions/{version}/logo', [DesignStudioController::class, 'logo'])->name('designs.logo');
+    Route::post('/design-studio/{design}/versions/{version}/artwork', [DesignStudioController::class, 'artwork'])->name('designs.artwork');
     Route::post('/design-studio/{design}/versions/{version}/submit', [DesignStudioController::class, 'submit'])->name('designs.submit');
     Route::post('/design-studio/{design}/versions/{version}/approve', [DesignStudioController::class, 'approve'])->name('designs.approve');
     Route::post('/design-studio/{design}/versions/{version}/changes', [DesignStudioController::class, 'changes'])->name('designs.changes');

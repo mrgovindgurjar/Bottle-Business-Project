@@ -1,163 +1,162 @@
 @extends('layouts.admin')
-@section('title', 'Design Studio — ' . $design->title)
-
-
-@section('page_title', 'Design Studio')
+@section('title','Design Studio — '.$design->title)
+@section('page_title','Design Studio')
 @section('breadcrumb') CRM / Design Studio / {{ $design->design_code }} @endsection
 
-
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/design-studio.css') }}">
+@endpush
 
 @section('content')
-    @php $data = $version?->design_data ?? [];
-        $front = $data['front'] ?? [];
-        $back = $data['back'] ?? [];
-    $global = $data['global'] ?? []; @endphp
-    <div class="ds-studio-shell" id="designStudio" data-save-url="{{ route('admin.designs.save', [$design, $version]) }}"
-        data-new-version-url="{{ route('admin.designs.new-version', [$design, $version]) }}">
-        <div class="ds-studio-top">
+@php
+    $data = $version?->design_data ?? [];
+    $jalvanDesignPayload = [
+        'design' => $design->only(['id','design_code','status','design_type']),
+        'version' => $version?->only(['id','version_no','name','design_data','logo_path','front_artwork_path','back_artwork_path','status','change_note']),
+    ];
+@endphp
+
+<div class="ds3" id="designStudio"
+    data-save-url="{{ route('admin.designs.save',[$design,$version]) }}"
+    data-preview-url="{{ route('admin.designs.show',$design) }}"
+    data-new-version-url="{{ route('admin.designs.new-version',[$design,$version]) }}"
+    data-logo-url="{{ route('admin.designs.logo',[$design,$version]) }}"
+    data-artwork-url="{{ route('admin.designs.artwork',[$design,$version]) }}">
+
+    <header class="ds3-head">
+        <div class="ds3-head-main">
+            <a class="ds3-back" href="{{ route('admin.designs.show',$design) }}">←</a>
             <div>
-                <div class="ds-kicker">{{ $design->design_code }} · V{{ $version?->version_no ?? 1 }}</div>
+                <div class="ds3-eyebrow">DESIGN STUDIO · {{ $design->design_code }} · V{{ $version?->version_no ?? 1 }}</div>
                 <h1>{{ $design->title }}</h1>
-                <p>{{ $design->customer->business_name }} @if($design->product) · {{ $design->product->name }} ·
-                {{ $design->product->bottle_size_ml }}ml @endif</p>
+                <p>{{ $design->customer->business_name }} @if($design->product) · {{ $design->product->name }} · {{ $design->product->bottle_size_ml }}ml @endif</p>
             </div>
-            <div class="ds-top-actions"><a class="btn btn-secondary"
-                    href="{{ route('admin.designs.show', $design) }}">Preview</a><button class="btn btn-secondary"
-                    type="button" id="newVersionBtn">＋ New Version</button><button class="btn btn-primary" type="button"
-                    id="saveDesignBtn">Save Draft</button></div>
         </div>
-
-        <div class="ds-workspace">
-            <aside class="ds-editor-panel">
-                <div class="ds-step-tabs"><button class="active" data-tab="brand">Brand</button><button
-                        data-tab="content">Content</button><button data-tab="style">Style</button><button data-tab="qr">QR &
-                        Print</button></div>
-                <div class="ds-panel-scroll">
-                    <div class="ds-editor-section active" data-panel="brand">
-                        <div class="ds-panel-title">Brand assets <small>Customer identity</small></div><label>Logo <div
-                                class="ds-upload"><input type="file" id="logoUpload"
-                                    accept="image/png,image/jpeg,image/webp,image/svg+xml"><span>＋</span>
-                                <div><b>Upload logo</b><small>PNG, JPG, WEBP or SVG · max 4MB</small></div>
-                            </div></label>
-                        <div class="ds-mini-grid"><label>Brand type<select
-                                    id="designType">@foreach(['restaurant', 'hotel', 'cafe', 'event', 'corporate', 'premium'] as $t)
-                                        <option value="{{ $t }}" @selected($design->design_type === $t)>{{ ucfirst($t) }}</option>
-                                    @endforeach
-                                </select></label><label>Font<select id="fontFamily">
-                                    <option>Inter</option>
-                                    <option>Georgia</option>
-                                    <option>Arial</option>
-                                    <option>Montserrat</option>
-                                </select></label></div>
-                    </div>
-                    <div class="ds-editor-section" data-panel="content">
-                        <div class="ds-panel-title">Label content <small>Front & back are independent</small></div>
-                        <div class="ds-side-switch"><button class="active" data-side="front">Front</button><button
-                                data-side="back">Back</button></div>
-                        <div id="contentFields"></div>
-                    </div>
-                    <div class="ds-editor-section" data-panel="style">
-                        <div class="ds-panel-title">Visual style <small>Live on the bottle</small></div>
-                        <div class="ds-color-row"><label>Background<input type="color"
-                                    id="bgColor"></label><label>Accent<input type="color" id="accentColor"></label></div>
-                        <label>Logo scale<input type="range" id="logoScale" min="0.6" max="1.8"
-                                step="0.05"></label><label>Logo vertical position<input type="range" id="logoY" min="5"
-                                max="35" step="1"></label><label>QR size<input type="range" id="qrSize" min="12" max="34"
-                                step="1"></label>
-                        <div class="ds-style-presets"><button data-bg="#ffffff"
-                                data-accent="#111827">Minimal</button><button data-bg="#f7f1e7"
-                                data-accent="#7a2e2e">Restaurant</button><button data-bg="#0f172a"
-                                data-accent="#ffffff">Luxury</button><button data-bg="#eefbff"
-                                data-accent="#0794c9">Fresh</button></div>
-                    </div>
-                    <div class="ds-editor-section" data-panel="qr">
-                        <div class="ds-panel-title">QR & print handoff <small>Destination stored with this version</small>
-                        </div><label>QR destination URL<input type="url" id="qrUrl"
-                                placeholder="https://example.com/menu"></label>
-                        <div class="ds-qr-help"><b>Recommended</b><span>Use a permanent menu/landing URL so printed bottles
-                                keep working even if your menu changes.</span></div><label>Version name<input
-                                id="versionName" value="{{ $version?->name }}"></label><label>Change note<textarea
-                                id="changeNote" rows="3"
-                                placeholder="What changed in this version?">{{ $version?->change_note }}</textarea></label>
-                    </div>
-                </div>
-            </aside>
-
-            <section class="ds-canvas-area">
-                <div class="ds-canvas-toolbar">
-                    <div class="ds-view-switch"><button class="active" data-view="front">Front Label</button><button
-                            data-view="back">Back Label</button></div><span>Live preview · click side to edit</span><button
-                        id="zoomReset" type="button">Reset view</button>
-                </div>
-                <div class="ds-stage">
-                    <div class="ds-bottle-shadow"></div>
-                    <div class="ds-bottle">
-                        <div class="ds-cap"></div>
-                        <div class="ds-neck"></div>
-                        <div class="ds-body">
-                            <div class="ds-label" id="previewLabel">
-                                <div class="ds-logo-slot" id="previewLogo">
-                                    {{ $version?->logo_path ? "" : "J" }}@if($version?->logo_path)<img
-                                    src="{{ asset("storage/" . $version->logo_path) }}" alt="Logo">@endif</div>
-                                <div class="ds-label-title" id="previewTitle"></div>
-                                <div class="ds-label-subtitle" id="previewSubtitle"></div>
-                                <div class="ds-label-body" id="previewBody"></div>
-                                <div class="ds-qr" id="previewQr">
-                                    <div class="ds-qr-pattern"></div>
-                                </div>
-                                <div class="ds-label-footer" id="previewFooter"></div>
-                            </div>
-                        </div>
-                        <div class="ds-base"></div>
-                    </div>
-                    <div class="ds-orbit orbit-a"></div>
-                    <div class="ds-orbit orbit-b"></div>
-                </div>
-                <div class="ds-stage-meta"><span><b>Front</b> · 1 printable label</span><span><b>Back</b> · 1 printable
-                        label</span><span>Artwork data saved to ERP</span></div>
-            </section>
-
-            <aside class="ds-inspector">
-                <div class="ds-inspector-head">
-                    <div class="ds-kicker">PROJECT STATUS</div><span
-                        class="ds-status ds-{{ $design->status }}"><b></b>{{ ucwords(str_replace('_', ' ', $design->status)) }}</span>
-                </div>
-                <div class="ds-inspector-card">
-                    <span>Customer</span><strong>{{ $design->customer->business_name }}</strong><small>{{ $design->customer->customer_code }}</small>
-                </div>
-                <div class="ds-inspector-card">
-                    <span>Product</span><strong>{{ $design->product?->name ?? 'Any bottle' }}</strong><small>{{ $design->product?->bottle_size_ml ? $design->product->bottle_size_ml . ' ml' : 'Product can be selected later' }}</small>
-                </div>
-                <div class="ds-inspector-card"><span>Current
-                        version</span><strong>V{{ $version?->version_no ?? 1 }}</strong><small>{{ $version?->status ?? 'draft' }}</small>
-                </div>
-                <div class="ds-approval-box">
-                    <div class="ds-kicker">WORKFLOW</div>
-                    <div class="ds-flow"><span class="done">Draft</span><i>→</i><span
-                            class="{{ in_array($design->status, ['in_review', 'changes_requested', 'approved']) ? 'done' : '' }}">Review</span><i>→</i><span
-                            class="{{ $design->status === 'approved' ? 'done' : '' }}">Approved</span><i>→</i><span>Production</span>
-                    </div>
-                    <form method="POST" action="{{ route('admin.designs.submit', [$design, $version]) }}">@csrf<button
-                            class="btn btn-primary ds-full" {{ in_array($version?->status, ['approved', 'submitted']) ? 'disabled' : '' }}>Submit for Review
-                            →</button></form>
-                </div>
-                <div class="ds-hint"><b>Print-ready workflow</b>
-                    <p>Keep the approved version locked. If the customer asks for a change, create a new version instead of
-                        overwriting approved artwork.</p>
-                </div>
-            </aside>
+        <div class="ds3-head-actions">
+            <span class="ds3-save-state" id="saveState">All changes saved</span>
+            <button class="ds3-btn ds3-btn-ghost" type="button" id="undoBtn" title="Undo (Ctrl+Z)">↶</button>
+            <button class="ds3-btn ds3-btn-ghost" type="button" id="redoBtn" title="Redo (Ctrl+Y)">↷</button>
+            <button class="ds3-btn ds3-btn-ghost" type="button" id="previewBtn">Preview</button>
+            <button class="ds3-btn ds3-btn-ghost" type="button" id="newVersionBtn">＋ New Version</button>
+            <button class="ds3-btn ds3-btn-primary" type="button" id="saveDesignBtn">Save Draft</button>
         </div>
+    </header>
+
+    <div class="ds3-layout">
+        <aside class="ds3-left">
+            <div class="ds3-tabs" role="tablist">
+                <button class="active" data-panel="elements">Elements</button>
+                <button data-panel="style">Style</button>
+                <button data-panel="assets">Assets</button>
+                <button data-panel="print">Print</button>
+            </div>
+
+            <div class="ds3-left-scroll">
+                <section class="ds3-left-panel active" data-panel-view="elements">
+                    <div class="ds3-section-title">Add to label <small>Build your artwork</small></div>
+                    <div class="ds3-tool-grid">
+                        <button data-add="text"><span>T</span><b>Text</b><small>Heading / copy</small></button>
+                        <button data-add="qr"><span>⌗</span><b>QR Code</b><small>Menu / offers</small></button>
+                        <button data-add="shape"><span>◇</span><b>Shape</b><small>Accent block</small></button>
+                        <button data-add="logo"><span>◉</span><b>Logo</b><small>Brand mark</small></button>
+                        <button data-add="divider"><span>—</span><b>Divider</b><small>Visual separator</small></button>
+                        <button data-add="artwork"><span>▧</span><b>Artwork</b><small>Uploaded artwork</small></button>
+                    </div>
+                    <div class="ds3-section-title ds3-space">Layers <small>Top layer renders last</small></div>
+                    <div class="ds3-layers" id="layersList"></div>
+                    <div class="ds3-layer-actions">
+                        <button type="button" id="layerUp">↑ Up</button><button type="button" id="layerDown">↓ Down</button>
+                        <button type="button" id="duplicateElement">Duplicate</button><button type="button" id="deleteElement">Delete</button>
+                    </div>
+                </section>
+
+                <section class="ds3-left-panel" data-panel-view="style">
+                    <div class="ds3-section-title">Label style <small>Applied to current side</small></div>
+                    <div class="ds3-color-pair">
+                        <label>Background<input type="color" id="bgColor"></label>
+                        <label>Accent<input type="color" id="accentColor"></label>
+                    </div>
+                    <label class="ds3-field">Font family<select id="fontFamily"><option>Inter</option><option>Montserrat</option><option>Arial</option><option>Georgia</option><option>Times New Roman</option></select></label>
+                    <div class="ds3-section-title ds3-space">Presets <small>One-click starting points</small></div>
+                    <div class="ds3-presets">
+                        <button data-bg="#ffffff" data-accent="#111827" data-font="Inter">Minimal</button>
+                        <button data-bg="#fff8ef" data-accent="#a32d22" data-font="Georgia">Restaurant</button>
+                        <button data-bg="#111827" data-accent="#ffffff" data-font="Inter">Luxury</button>
+                        <button data-bg="#eefaff" data-accent="#078fca" data-font="Montserrat">Fresh</button>
+                    </div>
+                    <div class="ds3-field-note">Use the inspector on the right for selected element typography, size, position and rotation.</div>
+                </section>
+
+                <section class="ds3-left-panel" data-panel-view="assets">
+                    <div class="ds3-section-title">Brand & artwork <small>Version-specific assets</small></div>
+                    <label class="ds3-upload"><input type="file" id="logoUpload" accept="image/png,image/jpeg,image/webp,image/svg+xml"><span>＋</span><div><b>Upload brand logo</b><small>PNG, JPG, WEBP, SVG · max 4MB</small></div></label>
+                    <label class="ds3-upload"><input type="file" id="frontArtworkUpload" accept="image/png,image/jpeg,image/webp"><span>＋</span><div><b>Front artwork</b><small>PNG, JPG, WEBP · max 6MB</small></div></label>
+                    <label class="ds3-upload"><input type="file" id="backArtworkUpload" accept="image/png,image/jpeg,image/webp"><span>＋</span><div><b>Back artwork</b><small>PNG, JPG, WEBP · max 6MB</small></div></label>
+                    <div class="ds3-inline-actions"><button type="button" id="showArtwork">Show artwork</button><button type="button" id="hideArtwork">Hide artwork</button></div>
+                    <div class="ds3-field-note">Uploaded artwork is a reference/print asset. Editable elements remain the ERP source of truth.</div>
+                </section>
+
+                <section class="ds3-left-panel" data-panel-view="print">
+                    <div class="ds3-section-title">Print handoff <small>Keep dimensions explicit</small></div>
+                    <div class="ds3-two-col">
+                        <label class="ds3-field">Width (mm)<input type="number" id="printWidth" min="10" max="1000" step="0.1"></label>
+                        <label class="ds3-field">Height (mm)<input type="number" id="printHeight" min="10" max="1000" step="0.1"></label>
+                    </div>
+                    <label class="ds3-field">Resolution<select id="printDpi"><option value="150">150 DPI · proof</option><option value="300">300 DPI · print</option><option value="600">600 DPI · high quality</option></select></label>
+                    <div class="ds3-export-grid"><button type="button" id="exportFront">Export Front PNG</button><button type="button" id="exportBack">Export Back PNG</button><button type="button" id="printLabel">Print Preview</button></div>
+                    <div class="ds3-qr-box"><b>QR destination</b><input type="url" id="qrUrl" placeholder="https://example.com/menu"><small>QR is generated live in the browser and the destination is saved with this design version.</small></div>
+                    <label class="ds3-field">Version name<input id="versionName" value="{{ $version?->name }}"></label>
+                    <label class="ds3-field">Change note<textarea id="changeNote" rows="3" placeholder="What changed in this version?">{{ $version?->change_note }}</textarea></label>
+                </section>
+            </div>
+        </aside>
+
+        <main class="ds3-canvas-wrap">
+            <div class="ds3-canvas-toolbar">
+                <div class="ds3-side-switch"><button class="active" data-side="front">Front</button><button data-side="back">Back</button></div>
+                <div class="ds3-canvas-tools"><button type="button" id="gridBtn">▦ Grid</button><button type="button" id="fitBtn">Fit</button><button type="button" id="zoomOut">−</button><span id="zoomValue">100%</span><button type="button" id="zoomIn">＋</button></div>
+            </div>
+            <div class="ds3-stage" id="stage">
+                <div class="ds3-ruler ds3-ruler-x"></div><div class="ds3-ruler ds3-ruler-y"></div>
+                <div class="ds3-bottle-scene">
+                    <div class="ds3-orbit o1"></div><div class="ds3-orbit o2"></div>
+                    <div class="ds3-bottle">
+                        <div class="ds3-cap"></div><div class="ds3-neck"></div>
+                        <div class="ds3-body"><div class="ds3-label" id="previewLabel"></div></div><div class="ds3-base"></div>
+                    </div>
+                    <div class="ds3-ground"></div>
+                </div>
+                <div class="ds3-stage-tip">Select an element to edit · Drag to move · Arrow keys to nudge · Delete to remove</div>
+            </div>
+        </main>
+
+        <aside class="ds3-right">
+            <div class="ds3-inspector-head"><div><span class="ds3-eyebrow">INSPECTOR</span><h2 id="inspectorTitle">No element selected</h2></div><span class="ds3-live-dot">LIVE</span></div>
+            <div id="inspectorEmpty" class="ds3-inspector-empty"><div>✦</div><b>Select an element</b><p>Click text, logo, QR or a shape on the label to edit it.</p></div>
+            <div id="inspectorFields" class="ds3-inspector-fields" hidden>
+                <div class="ds3-field-group"><div class="ds3-group-title">Content</div><label class="ds3-field">Text<textarea id="elText" rows="3"></textarea></label><label class="ds3-field">Font<select id="elFont"><option>Inter</option><option>Montserrat</option><option>Arial</option><option>Georgia</option><option>Times New Roman</option></select></label></div>
+                <div class="ds3-field-group"><div class="ds3-group-title">Typography</div><div class="ds3-two-col"><label class="ds3-field">Size<input type="number" id="elSize" min="6" max="200" step="1"></label><label class="ds3-field">Weight<select id="elWeight"><option value="400">Regular</option><option value="500">Medium</option><option value="600">Semibold</option><option value="700">Bold</option><option value="800">Extra Bold</option></select></label></div><div class="ds3-align-row"><button data-align="left">Left</button><button data-align="center">Center</button><button data-align="right">Right</button></div></div>
+                <div class="ds3-field-group"><div class="ds3-group-title">Transform</div><div class="ds3-two-col"><label class="ds3-field">X %<input type="number" id="elX" min="0" max="100" step="0.1"></label><label class="ds3-field">Y %<input type="number" id="elY" min="0" max="100" step="0.1"></label><label class="ds3-field">Width %<input type="number" id="elW" min="1" max="100" step="0.5"></label><label class="ds3-field">Rotation<input type="number" id="elRotate" min="-180" max="180" step="1"></label></div><label class="ds3-field">Opacity<input type="range" id="elOpacity" min="0.1" max="1" step="0.05"></label></div>
+                <div class="ds3-field-group"><div class="ds3-group-title">Color</div><div class="ds3-color-pair"><label>Text/Fill<input type="color" id="elColor"></label><label>Border<input type="color" id="elBorder"></label></div></div>
+                <div class="ds3-field-group ds3-element-actions"><button type="button" id="alignCenter">Center X</button><button type="button" id="lockElement">Lock</button><button type="button" id="inspectorDuplicate">Duplicate</button><button type="button" id="inspectorDelete" class="danger">Delete</button></div>
+            </div>
+            <div class="ds3-workflow-card"><div class="ds3-eyebrow">WORKFLOW</div><div class="ds3-flow"><span class="done">Draft</span><i>→</i><span class="{{ in_array($design->status,['in_review','changes_requested','approved'])?'done':'' }}">Review</span><i>→</i><span class="{{ $design->status==='approved'?'done':'' }}">Approved</span><i>→</i><span>Production</span></div><form method="POST" action="{{ route('admin.designs.submit',[$design,$version]) }}">@csrf<button class="ds3-btn ds3-btn-primary ds3-full" {{ in_array($version?->status,['approved','submitted'])?'disabled':'' }}>Submit for Review →</button></form></div>
+        </aside>
     </div>
-    <form id="designSaveForm" method="POST" action="{{ route('admin.designs.save', [$design, $version]) }}" hidden>@csrf
-        @method('PUT')<input name="design_data" id="designDataInput"><input name="version_name" id="versionNameInput"><input
-            name="change_note" id="changeNoteInput"></form>
-    <form id="newVersionForm" method="POST" action="{{ route('admin.designs.new-version', [$design, $version]) }}" hidden>
-        @csrf<input name="design_data" id="newVersionDataInput"><input name="version_name" value="New Version"><input
-            name="change_note" id="newVersionNoteInput"></form>
+</div>
+
+<form id="designSaveForm" method="POST" action="{{ route('admin.designs.save',[$design,$version]) }}" hidden>@csrf @method('PUT')<input name="design_data" id="designDataInput"><input name="version_name" id="versionNameInput"><input name="change_note" id="changeNoteInput"></form>
+<form id="newVersionForm" method="POST" action="{{ route('admin.designs.new-version',[$design,$version]) }}" hidden>@csrf<input name="design_data" id="newVersionDataInput"><input name="version_name" value="New Version"><input name="change_note" id="newVersionNoteInput"></form>
+
+@php $assetBase = asset('storage'); @endphp
+<script>
+window.JALVAN_DESIGN = {{ \Illuminate\Support\Js::from($jalvanDesignPayload) }};
+window.JALVAN_ASSET_BASE = @json($assetBase);
+</script>
 @endsection
 
-<script>window.JALVAN_DESIGN = @json(['design' => $design->only(['id', 'design_code', 'status', 'design_type']), 'version' => $version?->only(['id', 'version_no', 'name', 'design_data', 'logo_path', 'status', 'change_note'])]);</script>
-
-
+@push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="{{ asset('js/design-studio.js') }}"></script>
-<link rel="stylesheet" href="{{ asset('css/design-studio.css') }}">
+@endpush

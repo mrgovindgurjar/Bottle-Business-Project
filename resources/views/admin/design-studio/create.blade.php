@@ -2,11 +2,8 @@
 @section('title','New Design — JALVAN ERP')
 @section('page_title','New Design')
 @section('breadcrumb') CRM / Design Studio / New Design @endsection
-@push('styles')    
-    <link rel="stylesheet" href="{{ asset('css/design-studio.css') }}">
-@endpush
-@push('scripts')    
-    <script src="{{ asset('js/design-studio.js') }}"></script>
+@push('styles')
+<link rel="stylesheet" href="{{ asset('css/design-studio.css') }}">
 @endpush
 
 @section('content')
@@ -21,3 +18,6 @@
     </form>
 </div>
 @endsection
+@push('scripts')
+ <script src="{{ asset('js/design-studio.js') }}"></script>
+@endpush

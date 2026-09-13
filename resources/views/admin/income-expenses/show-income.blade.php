@@ -1,0 +1,7 @@
+@extends('layouts.admin')
+@section('title','Income '.$income->income_number) @section('page_title','Income '.$income->income_number)
+@push('styles')<link rel="stylesheet" href="{{ asset('css/income-expenses.css') }}">@endpush
+@section('content')
+
+<div class="fin-wrap"><div class="fin-card fin-detail"><div class="fin-detail-head"><div><span class="fin-label">Income</span><h1>{{ $income->income_number }}</h1></div><strong class="income">₹{{ number_format($income->amount,2) }}</strong></div><div class="fin-detail-grid"><div><span>Date</span><b>{{ $income->income_date?->format('d M Y') }}</b></div><div><span>Category</span><b>{{ $income->category?->name }}</b></div><div><span>Method</span><b>{{ $income->payment_method }}</b></div><div><span>Status</span><b>{{ ucfirst($income->status) }}</b></div><div><span>Description</span><b>{{ $income->description }}</b></div><div><span>Reference</span><b>{{ $income->reference_number ?: '—' }}</b></div></div><div class="fin-submit"><a class="fin-btn fin-btn-in" href="{{ route('admin.income-expenses.edit-income',$income) }}">Edit</a>@if($income->status!=='cancelled')<form method="POST" action="{{ route('admin.income-expenses.cancel-income',$income) }}" onsubmit="return confirm('Cancel this income entry?')">@csrf<input type="hidden" name="reason" value="Cancelled by admin"><button class="danger">Cancel</button></form>@endif<a href="{{ route('admin.income-expenses.index') }}">Back</a></div></div></div>
+@endsection

@@ -34,4 +34,10 @@ class Product extends Model
     {
         return $this->image_path ? Storage::disk('public')->url($this->image_path) : null;
     }
+
+    public function inventoryItems()
+{
+    return $this->hasMany(InventoryItem::class);
+}
+
 }
