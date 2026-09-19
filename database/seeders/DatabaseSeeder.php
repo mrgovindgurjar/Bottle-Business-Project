@@ -21,7 +21,9 @@ class DatabaseSeeder extends Seeder
                 PaymentPermissionSeeder::class,
                 InventoryPermissionSeeder::class,
                 IncomeExpensePermissionSeeder::class,
-                StaffAttendancePermissionSeeder::class
+                StaffAttendancePermissionSeeder::class,
+                IssuePermissionSeeder::class,
+                ReportPermissionSeeder::class
         ]);
     }
 }

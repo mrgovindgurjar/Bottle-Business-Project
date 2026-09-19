@@ -612,6 +612,24 @@
 
             </a>
 
+             <a
+                href="{{ route('admin.salary.index') }}"
+                class="nav-item {{ request()->routeIs('admin.salary.*') ? 'active' : '' }}"
+            >
+
+                <span class="nav-icon">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="7" r="3"/>
+                        <path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>
+                    </svg>
+                </span>
+
+                <span class="nav-label">
+                    Salary
+                </span>
+
+            </a>
+
 
             <a
                 href="{{ route('admin.attendance.index') }}"
@@ -652,8 +670,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.issues.index') }}"
+                class="nav-item {{ request()->routeIs('admin.issues.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">
@@ -683,8 +701,8 @@
 
 
             <a
-                href="#"
-                class="nav-item"
+                href="{{ route('admin.reports.index') }}"
+                class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
             >
 
                 <span class="nav-icon">

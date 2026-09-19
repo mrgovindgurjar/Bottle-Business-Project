@@ -1,0 +1,9 @@
+@extends('layouts.admin')
+@section('title','Issue Categories')
+@section('page_title','Issue Categories')
+@section('content')
+<link rel="stylesheet" href="{{ asset('css/issues.css') }}">
+<div class="issue-page"><div class="issue-head"><div><h1>Issue Categories</h1><p>Manage complaint and operational issue classifications.</p></div><a class="issue-btn" href="{{ route('admin.issues.index') }}">← Issues</a></div>
+<div class="category-grid"><div class="issue-card"><h3>Add Category</h3><form method="POST" action="{{ route('admin.issues.categories.store') }}">@csrf<label>Name<input name="name" required></label><label>Slug<input name="slug" placeholder="delivery-delay"></label><label>Description<textarea name="description" rows="3"></textarea></label><label>Sort Order<input type="number" name="sort_order" value="0" min="0"></label><label class="check"><input type="checkbox" name="is_active" value="1" checked> Active</label><button class="issue-btn primary">Add Category</button></form></div>
+<div class="issue-card"><h3>Categories</h3><div class="category-list">@forelse($categories as $category)<div class="category-row"><div><b>{{ $category->name }}</b><small>{{ $category->slug }} · {{ $category->issues_count }} issues</small></div><form method="POST" action="{{ route('admin.issues.categories.update',$category) }}" class="category-edit">@csrf @method('PUT')<input name="name" value="{{ $category->name }}" required><input name="slug" value="{{ $category->slug }}"><input type="number" name="sort_order" value="{{ $category->sort_order }}" min="0"><label><input type="checkbox" name="is_active" value="1" @checked($category->is_active)> Active</label><button class="issue-btn">Save</button></form></div>@empty<p class="muted">No categories yet.</p>@endforelse</div>{{ $categories->links() }}</div></div></div>
+@endsection

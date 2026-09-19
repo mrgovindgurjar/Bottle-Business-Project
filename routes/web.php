@@ -169,6 +169,8 @@ require __DIR__ . '/invoices.php';
 require __DIR__ . '/income_expenses.php';
 require __DIR__ . '/income_expense_categories.php';
 require __DIR__ . '/staff_attendance.php';
+require __DIR__ . '/issues.php';
+require __DIR__ . '/reports.php';
 
 
 

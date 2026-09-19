@@ -34,6 +34,11 @@ class Staff extends Model
         return $this->hasMany(StaffAttendance::class);
     }
 
+    public function salaryPayments()
+    {
+        return $this->hasMany(SalaryPayment::class);
+    }
+
     public function getFullNameAttribute(): string
     {
         return trim($this->first_name.' '.$this->last_name);

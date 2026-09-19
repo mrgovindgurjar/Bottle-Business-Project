@@ -5,6 +5,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreStaffRequest;
 use App\Http\Requests\UpdateStaffRequest;
 use App\Models\Staff;
+use App\Models\Role;
 use App\Services\StaffService;
 use Illuminate\Http\Request;
 
@@ -30,7 +31,7 @@ class StaffController extends Controller
     public function create(Request $request)
     {
         abort_unless($request->user()->hasPermission('staff.create'), 403);
-        return view('admin.staff.create');
+        return view('admin.staff.create', ['roles' => Role::where('is_active', true)->orderBy('name')->get(['id','name'])]);
     }
 
     public function store(StoreStaffRequest $request)
@@ -50,7 +51,7 @@ class StaffController extends Controller
     public function edit(Request $request, Staff $staff)
     {
         abort_unless($request->user()->hasPermission('staff.edit'), 403);
-        return view('admin.staff.edit', compact('staff'));
+        return view('admin.staff.edit', ['staff'=>$staff, 'roles'=>Role::where('is_active', true)->orderBy('name')->get(['id','name'])]);
     }
 
     public function update(UpdateStaffRequest $request, Staff $staff)

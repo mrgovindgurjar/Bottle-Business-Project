@@ -17,6 +17,11 @@ class StaffAttendancePermissionSeeder extends Seeder
             ['name'=>'Edit Attendance','slug'=>'attendance.edit','module'=>'attendance','action'=>'edit'],
             ['name'=>'Delete Attendance','slug'=>'attendance.delete','module'=>'attendance','action'=>'delete'],
             ['name'=>'Export Attendance','slug'=>'attendance.export','module'=>'attendance','action'=>'export'],
+            ['name'=>'View Salary','slug'=>'salary.view','module'=>'salary','action'=>'view'],
+            ['name'=>'Create Salary','slug'=>'salary.create','module'=>'salary','action'=>'create'],
+            ['name'=>'Edit Salary','slug'=>'salary.edit','module'=>'salary','action'=>'edit'],
+            ['name'=>'Pay Salary','slug'=>'salary.pay','module'=>'salary','action'=>'pay'],
+            ['name'=>'Cancel Salary','slug'=>'salary.cancel','module'=>'salary','action'=>'cancel'],
         ];
         foreach ($permissions as $p) {
             DB::table('permissions')->updateOrInsert(
@@ -25,7 +30,7 @@ class StaffAttendancePermissionSeeder extends Seeder
             );
         }
         $ids = DB::table('permissions')->whereIn('slug',array_column($permissions,'slug'))->pluck('id');
-        foreach (['super-admin','manager','hr'] as $roleSlug) {
+        foreach (['super-admin','manager','hr','accountant'] as $roleSlug) {
             $role = DB::table('roles')->where('slug',$roleSlug)->first();
             if (!$role) continue;
             foreach ($ids as $id) {
