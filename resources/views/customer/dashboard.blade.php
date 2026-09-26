@@ -6,12 +6,14 @@
     
      @section('content')
      <main class="portal-main">
+      @if(session('success'))<div class="portal-toast visible">{{ session('success') }}</div>@endif
+      @if($errors->any())<div class="portal-toast visible">{{ $errors->first() }}</div>@endif
       <!-- OVERVIEW -->
       <section class="portal-view active" id="view-overview">
         <div class="portal-welcome">
           <div>
             <span class="portal-eyebrow">CUSTOMER DASHBOARD / 25 AUG 2026</span>
-            <h1>Good evening,<br><em>Taste of India.</em></h1>
+            <h1>Welcome,<br><em>{{ $customer->business_name }}.</em></h1>
             <p>Here’s what’s happening with your branded bottle orders.</p>
           </div>
           <button class="portal-primary" onclick="showPortalView('designs')">+ Start a new design</button>
@@ -106,11 +108,23 @@
       <!-- PROFILE -->
       <section class="portal-view" id="view-profile">
         <div class="portal-page-heading"><span class="portal-eyebrow">BUSINESS PROFILE</span><h1>Your <em>business.</em></h1><p>Keep your contact and delivery details up to date.</p></div>
-        <div class="profile-card">
-          <div class="profile-avatar-large">TI</div>
-          <div class="profile-fields"><label>Business name<input value="Taste of India"></label><label>Contact person<input value="Rahul Sharma"></label><label>Mobile / WhatsApp<input value="+91 9XXXXXXXXX"></label><label>Email<input value="orders@tasteofindia.example"></label><label>Delivery city<input value="Bhopal, Madhya Pradesh"></label><label>Business type<select><option>Restaurant / Café</option><option>Hotel / Hospitality</option><option>Corporate</option></select></label></div>
-          <button class="portal-primary">Save changes</button>
-        </div>
+        <form method="POST" action="{{ route('customer.profile.update') }}" class="profile-card">
+          @csrf @method('PUT')
+          <div class="profile-avatar-large">{{ strtoupper(substr($customer->business_name,0,2)) }}</div>
+          <div class="profile-fields">
+            <label>Business name<input name="business_name" value="{{ old('business_name',$customer->business_name) }}" required></label>
+            <label>Contact person<input name="contact_name" value="{{ old('contact_name',$user->name) }}" required></label>
+            <label>Mobile / WhatsApp<input name="mobile" value="{{ old('mobile',$user->mobile) }}" required></label>
+            <label>Email<input type="email" name="email" value="{{ old('email',$user->email) }}" required></label>
+            <label>Business type<select name="business_type"><option value="">Select</option><option value="Restaurant / Café" @selected(old('business_type',$customer->business_type)==='Restaurant / Café')>Restaurant / Café</option><option value="Hotel / Hospitality" @selected(old('business_type',$customer->business_type)==='Hotel / Hospitality')>Hotel / Hospitality</option><option value="Corporate" @selected(old('business_type',$customer->business_type)==='Corporate')>Corporate</option><option value="Event / Catering" @selected(old('business_type',$customer->business_type)==='Event / Catering')>Event / Catering</option></select></label>
+            <label>GSTIN<input name="gstin" value="{{ old('gstin',$customer->gstin) }}"></label>
+            <label>Address<input name="address" value="{{ old('address',$customer->address) }}"></label>
+            <label>City<input name="city" value="{{ old('city',$customer->city) }}"></label>
+            <label>State<input name="state" value="{{ old('state',$customer->state) }}"></label>
+            <label>Pincode<input name="pincode" value="{{ old('pincode',$customer->pincode) }}"></label>
+          </div>
+          <button class="portal-primary" type="submit">Save changes</button>
+        </form>
       </section>
     </main>
     @endsection

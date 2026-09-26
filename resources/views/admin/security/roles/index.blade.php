@@ -1,0 +1,8 @@
+@extends('layouts.admin')
+@section('title','Roles & Permissions · JALVAN ERP')
+@push('styles')<link rel="stylesheet" href="{{ asset('css/security.css') }}">@endpush
+@push('scripts')<script src="{{ asset('js/security.js') }}"></script>@endpush
+@section('content')
+<div class="security-page"><div class="security-head"><div><span class="security-eyebrow">SECURITY & ACCOUNTS</span><h1>Roles & Permissions</h1><p>Control what each team role can access.</p></div>@if(auth()->user()->hasPermission('roles.create'))<a class="security-btn primary" href="{{ route('admin.security.roles.create') }}">+ New Role</a>@endif</div>
+<div class="role-grid">@forelse($roles as $role)<article class="security-card role-card"><div class="role-card-top"><div class="security-avatar shield">✓</div><div><h3>{{ $role->name }}</h3><small>{{ $role->slug }}</small></div><span class="status-pill {{ $role->is_active ? 'active':'inactive' }}">{{ $role->is_active ? 'Active':'Inactive' }}</span></div><p>{{ $role->description ?: 'No description provided.' }}</p><div class="role-meta"><span>{{ $role->users_count }} users</span><span>{{ $role->permissions_count }} permissions</span></div><div class="role-actions">@if(auth()->user()->hasPermission('roles.edit'))<a class="security-btn" href="{{ route('admin.security.roles.edit',$role) }}">Manage permissions</a>@endif @if(auth()->user()->hasPermission('roles.delete') && $role->slug!=='super-admin')<form method="POST" action="{{ route('admin.security.roles.destroy',$role) }}" onsubmit="return confirm('Delete this role?')">@csrf @method('DELETE')<button class="security-btn danger">Delete</button></form>@endif</div></article>@empty<div class="security-empty">No roles found.</div>@endforelse</div></div>
+@endsection

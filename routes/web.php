@@ -145,11 +145,20 @@ Route::prefix('admin')
         */
 
         Route::get('/', [WebsiteController::class,'index']);
-        Route::get('/customer-dashboard', [CustomerPortalController::class,'index'])->name('customer.main');
+        Route::middleware(['auth', 'customer'])->group(function () {
+            Route::get('/customer-dashboard', [CustomerPortalController::class,'index'])->name('customer.main');
+            Route::put('/customer-dashboard/profile', [CustomerPortalController::class,'updateProfile'])->name('customer.profile.update');
+        });
+
+        Route::get('/dashboard', function () {
+            return auth()->user()->hasRole('customer')
+                ? redirect()->route('customer.main')
+                : redirect()->route('admin.dashboard');
+        })->middleware('auth')->name('dashboard');
 
         
 
-// require __DIR__ . '/auth.php';
+require __DIR__ . '/auth.php';
 
  require __DIR__.'/design-studio.php';
 
@@ -176,3 +185,4 @@ require __DIR__ . '/reports.php';
 
 
  
+require __DIR__ . '/security.php';

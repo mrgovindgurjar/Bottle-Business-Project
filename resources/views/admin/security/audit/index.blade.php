@@ -1,0 +1,8 @@
+@extends('layouts.admin')
+@section('title','Audit Logs · JALVAN ERP')
+@push('styles')<link rel="stylesheet" href="{{ asset('css/security.css') }}">@endpush
+@section('content')
+<div class="security-page"><div class="security-head"><div><span class="security-eyebrow">SECURITY</span><h1>Audit Logs</h1><p>Track important authentication and account changes.</p></div></div>
+<form class="security-filter" method="GET"><input name="q" value="{{ request('q') }}" placeholder="Search event, user, IP or description..."><select name="event"><option value="">All events</option>@foreach($events as $event)<option value="{{ $event }}" @selected(request('event')===$event)>{{ $event }}</option>@endforeach</select><button class="security-btn">Search</button>@if(request()->hasAny(['q','event']))<a class="security-btn ghost" href="{{ route('admin.security.audit.index') }}">Clear</a>@endif</form>
+<div class="security-card table-wrap"><table class="security-table"><thead><tr><th>Time</th><th>Event</th><th>User</th><th>IP</th><th>Description</th></tr></thead><tbody>@forelse($logs as $log)<tr><td>{{ $log->created_at->format('d M Y, h:i A') }}</td><td><span class="role-pills"><span>{{ $log->event }}</span></span></td><td>{{ $log->user?->name ?? 'System / Guest' }}<small class="muted">{{ $log->user?->email }}</small></td><td>{{ $log->ip_address ?: '—' }}</td><td>{{ $log->description ?: '—' }}</td></tr>@empty<tr><td colspan="5"><div class="security-empty"><strong>No audit records</strong><span>Security activity will appear here.</span></div></td></tr>@endforelse</tbody></table></div><div class="security-pagination">{{ $logs->links() }}</div></div>
+@endsection

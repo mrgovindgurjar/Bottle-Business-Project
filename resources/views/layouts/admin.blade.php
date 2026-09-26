@@ -108,7 +108,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('dashboard.view'))
+
+<a
                 href="{{ route('admin.dashboard') }}"
                 class="nav-item {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}"
             >
@@ -152,6 +154,8 @@
 
             </a>
 
+            @endif
+
 
             {{-- SALES --}}
 
@@ -164,7 +168,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('leads.view'))
+
+<a
                 href="{{ route('admin.leads.index') }}"
                 class="nav-item {{ request()->routeIs('admin.leads.*') ? 'active' : '' }}"
             >
@@ -191,8 +197,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('customers.view'))
+
+<a
                 href="{{ route('admin.customers.index') }}"
                 class="nav-item {{ request()->routeIs('admin.customers.*') ? 'active' : '' }}"
             >
@@ -212,8 +222,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('quotations.view'))
+
+<a
                 href="{{ route('admin.quotations.index') }}"
                 class="nav-item {{ request()->routeIs('admin.quotations.*') ? 'active' : '' }}"
             >
@@ -232,8 +246,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('orders.view'))
+
+<a
                 href="{{ route('admin.orders.index') }}"
                 class="nav-item {{ request()->routeIs('admin.orders.*') ? 'active' : '' }}"
             >
@@ -252,6 +270,8 @@
 
             </a>
 
+            @endif
+
 
             {{-- CATALOG --}}
 
@@ -264,7 +284,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('products.view'))
+
+<a
                 href="{{ route('admin.products.index') }}"
                 class="nav-item {{ request()->routeIs('admin.products.*') ? 'active' : '' }}"
             >
@@ -285,8 +307,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('pricing.view'))
+
+<a
                 href="{{ route('admin.pricing.index') }}"
                 class="nav-item {{ request()->routeIs('admin.pricing.*') ? 'active' : '' }}"
             >
@@ -307,6 +333,8 @@
 
             </a>
 
+            @endif
+
 
             {{-- DESIGN / PRODUCTION --}}
 
@@ -319,7 +347,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('designs.view'))
+
+<a
                 href="{{ route('admin.designs.index') }}"
                 class="nav-item {{ request()->routeIs('admin.designs.*') ? 'active' : '' }}"
             >
@@ -337,8 +367,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('production.view'))
+
+<a
                 href="{{ route('admin.production.index') }}"
                 class="nav-item  {{ request()->routeIs('admin.production.*') ? 'active' : '' }}"
             >
@@ -357,8 +391,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('batches.view'))
+
+<a
                 href="{{ route('admin.batches.index') }}"
                 class="nav-item {{ request()->routeIs('admin.batches.*') ? 'active' : '' }}"
             >
@@ -382,8 +420,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('inventory.view'))
+
+<a
                 href="{{ route('admin.inventory.index') }}"
                 class="nav-item {{ request()->routeIs('admin.inventory.*') ? 'active' : '' }}"
             >
@@ -405,6 +447,8 @@
 
             </a>
 
+            @endif
+
              {{-- PROCUREMENT --}}
 
             <div class="nav-section">
@@ -416,7 +460,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('suppliers.view'))
+
+<a
                 href="{{ route('admin.suppliers.index') }}"
                 class="nav-item {{ request()->routeIs('admin.suppliers.*') ? 'active' : '' }}"
             >
@@ -436,7 +482,11 @@
 
             </a>
 
-             <a
+            @endif
+
+                          @if(auth()->user()?->hasPermission('purchases.view'))
+
+<a
                 href="{{ route('admin.purchases.index') }}"
                 class="nav-item {{ request()->routeIs('admin.purchases.*') ? 'active' : '' }}"
             >
@@ -456,6 +506,8 @@
 
             </a>
 
+             @endif
+
 
 
             {{-- DELIVERY --}}
@@ -469,7 +521,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('deliveries.view'))
+
+<a
                 href="{{ route('admin.deliveries.index') }}"
                 class="nav-item {{ request()->routeIs('admin.deliveries.*') ? 'active' : '' }}"
             >
@@ -489,6 +543,8 @@
 
             </a>
 
+            @endif
+
 
             {{-- FINANCE --}}
 
@@ -501,7 +557,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('payments.view'))
+
+<a
                 href="{{ route('admin.payments.index') }}"
                 class="nav-item {{ request()->routeIs('admin.payments.*') ? 'active' : '' }}"
             >
@@ -520,8 +578,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('invoices.view'))
+
+<a
                 href="{{ route('admin.invoices.index') }}"
                 class="nav-item {{ request()->routeIs('admin.invoices.*') ? 'active' : '' }}"
             >
@@ -541,8 +603,12 @@
 
             </a>
 
+            @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('income.view') || auth()->user()?->hasPermission('expenses.view'))
+
+<a
                 href="{{ route('admin.income-expenses.index') }}"
                 class="nav-item {{ request()->routeIs('admin.income-expenses.*') ? 'active' : '' }}"
             >
@@ -561,6 +627,10 @@
                 </span>
 
             </a>
+
+            @endif
+
+@if(auth()->user()?->hasPermission('finance.categories'))
 
             <a
                 href="{{ route('admin.income-expenses.categories.index') }}"
@@ -582,6 +652,8 @@
 
             </a>
 
+@endif
+
 
             {{-- PEOPLE --}}
 
@@ -594,7 +666,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('staff.view'))
+
+<a
                 href="{{ route('admin.staff.index') }}"
                 class="nav-item {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}"
             >
@@ -612,7 +686,11 @@
 
             </a>
 
-             <a
+            @endif
+
+                          @if(auth()->user()?->hasPermission('salary.view'))
+
+<a
                 href="{{ route('admin.salary.index') }}"
                 class="nav-item {{ request()->routeIs('admin.salary.*') ? 'active' : '' }}"
             >
@@ -630,8 +708,12 @@
 
             </a>
 
+             @endif
 
-            <a
+
+                        @if(auth()->user()?->hasPermission('attendance.view'))
+
+<a
                 href="{{ route('admin.attendance.index') }}"
                 class="nav-item {{ request()->routeIs('admin.attendance.*') ? 'active' : '' }}"
             >
@@ -657,6 +739,8 @@
 
             </a>
 
+            @endif
+
 
             {{-- SUPPORT --}}
 
@@ -669,7 +753,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('issues.view'))
+
+<a
                 href="{{ route('admin.issues.index') }}"
                 class="nav-item {{ request()->routeIs('admin.issues.*') ? 'active' : '' }}"
             >
@@ -688,6 +774,8 @@
 
             </a>
 
+            @endif
+
 
             {{-- ANALYTICS --}}
 
@@ -700,7 +788,9 @@
             </div>
 
 
-            <a
+                        @if(auth()->user()?->hasPermission('reports.view'))
+
+<a
                 href="{{ route('admin.reports.index') }}"
                 class="nav-item {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}"
             >
@@ -719,6 +809,8 @@
 
             </a>
 
+            @endif
+
 
             {{-- SYSTEM --}}
 
@@ -731,43 +823,33 @@
             </div>
 
 
-            <a
-                href="#"
-                class="nav-item"
-            >
-
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="8" r="3"/>
-                        <path d="M5 21c0-4 3-7 7-7s7 3 7 7"/>
-                    </svg>
-                </span>
-
-                <span class="nav-label">
-                    Users & Roles
-                </span>
-
+            @if(auth()->user()?->hasPermission('users.view'))
+            <a href="{{ route('admin.security.users.index') }}" class="nav-item {{ request()->routeIs('admin.security.users.*') ? 'active' : '' }}">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3"/><path d="M5 21c0-4 3-7 7-7s7 3 7 7"/></svg></span>
+                <span class="nav-label">Users</span>
             </a>
+            @endif
 
-
-            <a
-                href="#"
-                class="nav-item"
-            >
-
-                <span class="nav-icon">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 3v18"/>
-                        <path d="M3 12h18"/>
-                        <circle cx="12" cy="12" r="8"/>
-                    </svg>
-                </span>
-
-                <span class="nav-label">
-                    Settings
-                </span>
-
+            @if(auth()->user()?->hasPermission('roles.view'))
+            <a href="{{ route('admin.security.roles.index') }}" class="nav-item {{ request()->routeIs('admin.security.roles.*') ? 'active' : '' }}">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3l8 4v5c0 4.5-3.2 7.5-8 9-4.8-1.5-8-4.5-8-9V7z"/><path d="M9 12l2 2 4-4"/></svg></span>
+                <span class="nav-label">Roles & Permissions</span>
             </a>
+            @endif
+
+            @if(auth()->user()?->hasPermission('audit_logs.view'))
+            <a href="{{ route('admin.security.audit.index') }}" class="nav-item {{ request()->routeIs('admin.security.audit.*') ? 'active' : '' }}">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M5 4h14v16H5z"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+                <span class="nav-label">Audit Logs</span>
+            </a>
+            @endif
+
+            @if(auth()->user())
+            <a href="{{ route('admin.account.profile') }}" class="nav-item {{ request()->routeIs('admin.account.*') ? 'active' : '' }}">
+                <span class="nav-icon"><svg viewBox="0 0 24 24"><path d="M12 3v18"/><path d="M3 12h18"/><circle cx="12" cy="12" r="8"/></svg></span>
+                <span class="nav-label">Account Settings</span>
+            </a>
+            @endif
 
         </nav>
 
@@ -931,11 +1013,11 @@
 
                     <div class="user-dropdown">
 
-                        <a href="#">
+                        <a href="{{ route('admin.account.profile') }}">
                             My Profile
                         </a>
 
-                        <a href="#">
+                        <a href="{{ route('admin.account.profile') }}#security-password">
                             Account Settings
                         </a>
 

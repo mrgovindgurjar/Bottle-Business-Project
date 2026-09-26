@@ -17,7 +17,7 @@
 <body class="portal-page">
 
 <div class="portal-loader" id="portalLoader">
-  <div class="portal-loader-mark">A</div>
+  <div class="portal-loader-mark">J</div>
   <strong>Jal<span>Van</span></strong>
 </div>
 
@@ -40,7 +40,7 @@
       <p>Your AquaForm team is here for design, quote and order support.</p>
       <button>Talk to team ↗</button>
     </div>
-    <button class="portal-logout">↪ Sign out</button>
+    <form method="POST" action="{{ route('logout') }}" class="portal-logout-form">@csrf<button type="submit" class="portal-logout">↪ Sign out</button></form>
   </aside>
 
  @yield('content')

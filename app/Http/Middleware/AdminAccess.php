@@ -29,6 +29,10 @@ class AdminAccess
                 ]);
         }
 
+        if (!auth()->user()->roles()->where('slug', '!=', 'customer')->exists()) {
+            return redirect()->route('customer.main');
+        }
+
         return $next($request);
     }
 }

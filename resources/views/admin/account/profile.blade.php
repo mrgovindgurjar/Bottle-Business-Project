@@ -1,0 +1,9 @@
+@extends('layouts.admin')
+@section('title','My Profile · JALVAN ERP')
+@section('content')
+<div class="security-page"><div class="security-head"><div><span class="security-eyebrow">ACCOUNT</span><h1>My profile</h1><p>Manage your account information and password.</p></div></div>
+<div class="security-grid">
+<form method="POST" action="{{ route('admin.account.profile.update') }}" class="security-card security-section">@csrf @method('PUT')<div class="profile-hero"><div class="security-avatar big">{{ strtoupper(substr($user->name,0,1)) }}</div><div><h2>{{ $user->name }}</h2><p>{{ $user->roleNames() }}</p></div></div><div class="field-grid"><label>Name<input name="name" value="{{ old('name',$user->name) }}" required></label><label>Email<input type="email" name="email" value="{{ old('email',$user->email) }}" required></label><label>Mobile<input name="mobile" value="{{ old('mobile',$user->mobile) }}" required></label></div><div class="security-actions"><button class="security-btn primary">Save Profile</button></div></form>
+<form id="security-password" method="POST" action="{{ route('admin.account.password.update') }}" class="security-card security-section">@csrf @method('PUT')<div class="section-title"><strong>Change password</strong><span>Keep your account secure</span></div><div class="field-grid"><label class="field-wide">Current password<input type="password" name="current_password" required autocomplete="current-password"></label><label>New password<input type="password" name="password" required autocomplete="new-password"></label><label>Confirm password<input type="password" name="password_confirmation" required autocomplete="new-password"></label></div><div class="security-actions"><button class="security-btn primary">Change Password</button></div></form>
+</div></div>
+@endsection

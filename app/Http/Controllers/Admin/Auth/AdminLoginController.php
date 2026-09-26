@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 
@@ -54,6 +55,17 @@ class AdminLoginController extends Controller
 
         $request->session()->regenerate();
 
+        if ($request->user()->hasRole('customer')) {
+            Auth::logout();
+            $request->session()->invalidate();
+            $request->session()->regenerateToken();
+
+            return back()->withErrors(['login' => 'Customer accounts must use the customer login.'])->onlyInput('login');
+        }
+
+        $request->user()->forceFill(['last_login_at' => now()])->save();
+        AuditLog::record('auth.admin_login', $request->user(), [], [], 'Admin login successful.');
+
         return redirect()
             ->intended(
                 route('admin.dashboard')
@@ -64,6 +76,10 @@ class AdminLoginController extends Controller
         Request $request
     ): RedirectResponse {
 
+        $user = Auth::user();
+        if ($user) {
+            AuditLog::record('auth.logout', $user, [], [], 'Admin logout.');
+        }
         Auth::logout();
 
         $request->session()->invalidate();

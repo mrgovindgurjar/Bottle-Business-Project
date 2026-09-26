@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Customer;
 use App\Models\CustomerAddress;
+use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -45,6 +46,7 @@ class CustomerService
             ]);
 
             $this->assignCustomerRole($user);
+            AuditLog::record('customer.created', $customer, [], ['business_name'=>$customer->business_name,'customer_code'=>$customer->customer_code,'user_id'=>$user->id]);
 
             return [
                 'customer' => $customer,
@@ -93,7 +95,9 @@ class CustomerService
                 'notes' => $data['notes'] ?? null,
             ]);
 
-            return $customer->fresh(['user']);
+            $fresh = $customer->fresh(['user']);
+            AuditLog::record('customer.updated', $fresh, [], ['business_name'=>$fresh->business_name,'status'=>$fresh->status]);
+            return $fresh;
         });
     }
 
@@ -109,6 +113,7 @@ class CustomerService
             ]);
 
             $customer->delete();
+            AuditLog::record('customer.deactivated', $customer, ['status'=>Customer::STATUS_ACTIVE], ['status'=>Customer::STATUS_INACTIVE]);
         });
     }
 

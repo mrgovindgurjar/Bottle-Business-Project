@@ -31,7 +31,7 @@ class StaffController extends Controller
     public function create(Request $request)
     {
         abort_unless($request->user()->hasPermission('staff.create'), 403);
-        return view('admin.staff.create', ['roles' => Role::where('is_active', true)->orderBy('name')->get(['id','name'])]);
+        return view('admin.staff.create', ['roles' => Role::where('is_active', true)->where('slug', '!=', 'customer')->orderBy('name')->get(['id','name'])]);
     }
 
     public function store(StoreStaffRequest $request)
@@ -51,7 +51,7 @@ class StaffController extends Controller
     public function edit(Request $request, Staff $staff)
     {
         abort_unless($request->user()->hasPermission('staff.edit'), 403);
-        return view('admin.staff.edit', ['staff'=>$staff, 'roles'=>Role::where('is_active', true)->orderBy('name')->get(['id','name'])]);
+        return view('admin.staff.edit', ['staff'=>$staff, 'roles'=>Role::where('is_active', true)->where('slug', '!=', 'customer')->orderBy('name')->get(['id','name'])]);
     }
 
     public function update(UpdateStaffRequest $request, Staff $staff)

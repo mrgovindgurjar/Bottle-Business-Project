@@ -2,105 +2,95 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
-        'email',
-        'mobile',
-        'password',
+        'name', 'email', 'mobile', 'password', 'is_active',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
     protected $hidden = [
-        'password',
-        'remember_token',
+        'password', 'remember_token',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-
-   protected function casts(): array
-{
-    return [
-        'email_verified_at' => 'datetime',
-        'password' => 'hashed',
-        'is_active' => 'boolean',
-        'last_login_at' => 'datetime',
-    ];
-}
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+            'is_active' => 'boolean',
+            'last_login_at' => 'datetime',
+        ];
+    }
 
     public function customer(): HasOne
     {
         return $this->hasOne(Customer::class);
     }
- 
+
     public function roles()
-{
-    return $this->belongsToMany(
-        Role::class,
-        'user_roles'
-    );
-}
-
-public function leads()
-{
-    return $this->hasMany(
-        Lead::class,
-        'assigned_to'
-    );
-}
-
-public function leadActivities()
-{
-    return $this->hasMany(
-        LeadActivity::class
-    );
-}
- public function hasPermission(string $permission): bool
-{
-    if (
-        $this->roles()
-            ->where('slug', 'super-admin')
-            ->exists()
-    ) {
-        return true;
+    {
+        return $this->belongsToMany(Role::class, 'user_roles');
     }
 
-    return $this->roles()
-        ->whereHas(
-            'permissions',
-            function ($query) use ($permission) {
-                $query->where(
-                    'slug',
-                    $permission
-                );
-            }
-        )
-        ->exists();
-}
+    public function leads()
+    {
+        return $this->hasMany(Lead::class, 'assigned_to');
+    }
 
+    public function leadActivities()
+    {
+        return $this->hasMany(LeadActivity::class);
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->roles()->where('slug', $role)->exists();
+    }
+
+    public function hasAnyRole(array $roles): bool
+    {
+        return $this->roles()->whereIn('slug', $roles)->exists();
+    }
+
+    public function hasPermission(string $permission): bool
+    {
+        if ($this->hasRole('super-admin')) {
+            return true;
+        }
+
+        return $this->roles()
+            ->where('is_active', true)
+            ->whereHas('permissions', fn ($query) => $query->where('slug', $permission))
+            ->exists();
+    }
+
+    public function permissionSlugs(): array
+    {
+        return $this->roles()
+            ->with('permissions:id,slug')
+            ->get()
+            ->pluck('permissions')
+            ->flatten()
+            ->pluck('slug')
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    public function auditLogs()
+    {
+        return $this->hasMany(AuditLog::class);
+    }
+
+    public function roleNames(): string
+    {
+        return $this->roles()->pluck('name')->implode(', ');
+    }
 }
-    
