@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
                 SuppliersPurchasesPermissionSeeder::class,
                 DeliveryPermissionSeeder::class,
                 PaymentPermissionSeeder::class,
+                InvoicePermissionSeeder::class,
                 InventoryPermissionSeeder::class,
                 IncomeExpensePermissionSeeder::class,
                 StaffAttendancePermissionSeeder::class,

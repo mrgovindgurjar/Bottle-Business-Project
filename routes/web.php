@@ -51,27 +51,31 @@ Route::prefix('admin')
             )->name('products.index');
 
             Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+            Route::get('/customers/export', [CustomerController::class, 'export'])->name('customers.export');
             Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
             Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
-            Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
-            Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
-            Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
-            Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+            Route::get('/customers/{customer}', [CustomerController::class, 'show'])->withTrashed()->name('customers.show');
+            Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->withTrashed()->name('customers.edit');
+            Route::put('/customers/{customer}', [CustomerController::class, 'update'])->withTrashed()->name('customers.update');
+            Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->withTrashed()->name('customers.destroy');
+            Route::patch('/customers/{customer}/status', [CustomerController::class, 'setStatus'])->withTrashed()->name('customers.status');
+            Route::patch('/customers/{customer}/restore', [CustomerController::class, 'restore'])->withTrashed()->name('customers.restore');
 
             Route::post('/customers/{customer}/addresses', [CustomerController::class, 'storeAddress'])->name('customers.addresses.store');
             Route::put('/customers/{customer}/addresses/{address}', [CustomerController::class, 'updateAddress'])->name('customers.addresses.update');
             Route::delete('/customers/{customer}/addresses/{address}', [CustomerController::class, 'destroyAddress'])->name('customers.addresses.destroy');
             Route::post('/customers/{customer}/addresses/{address}/default', [CustomerController::class, 'setDefaultAddress'])->name('customers.addresses.default');
 
-             Route::get('/products', [ProductController::class, 'index'])->name('products.index');
             Route::get('/products/create', [ProductController::class, 'create'])->name('products.create');
             Route::post('/products', [ProductController::class, 'store'])->name('products.store');
+            Route::get('/products/export', [ProductController::class, 'export'])->name('products.export');
             Route::get('/products/{product}', [ProductController::class, 'show'])->name('products.show');
             Route::get('/products/{product}/edit', [ProductController::class, 'edit'])->name('products.edit');
             Route::put('/products/{product}', [ProductController::class, 'update'])->name('products.update');
             Route::delete('/products/{product}', [ProductController::class, 'destroy'])->name('products.destroy');
 
             Route::get('/pricing', [PricingController::class, 'index'])->name('pricing.index');
+            Route::get('/pricing/export', [PricingController::class, 'export'])->name('pricing.export');
             Route::post('/products/{product}/prices', [ProductPriceController::class, 'store'])->name('products.prices.store');
             Route::put('/product-prices/{productPrice}', [ProductPriceController::class, 'update'])->name('products.prices.update');
             Route::delete('/product-prices/{productPrice}', [ProductPriceController::class, 'destroy'])->name('products.prices.destroy');
@@ -79,10 +83,14 @@ Route::prefix('admin')
 
         });
 
-        Route::get(
+        Route::middleware('admin')->group(function () {
+
+    Route::get(
         '/leads',
         [LeadController::class, 'index']
     )->name('leads.index');
+
+    Route::get('/leads/export', [LeadController::class, 'export'])->name('leads.export');
 
     Route::get(
         '/leads/create',
@@ -132,11 +140,12 @@ Route::prefix('admin')
         [LeadController::class, 'convert']
     )->name('leads.convert');
 
-
     });
 
   
 
+
+    });
 
     /*
         |--------------------------------------------------------------------------
@@ -165,6 +174,7 @@ require __DIR__ . '/auth.php';
  require __DIR__.'/quotation.php';
 
  require __DIR__ . '/orders.php';
+ require __DIR__ . '/recurring.php';
 
 require __DIR__ . '/production.php';
 

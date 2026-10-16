@@ -269,6 +269,39 @@
                 </span>
 
             </a>
+                    @if(auth()->user()?->hasPermission('recurring_plans.view'))
+
+                    <a
+                        href="{{ route('admin.recurring-plans.index') }}"
+                        class="nav-item {{ request()->routeIs('admin.recurring-plans.*') ? 'active' : '' }}"
+                    >
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="8"/>
+                                <path d="M12 7v5l3 2"/>
+                            </svg>
+                        </span>
+                        <span class="nav-label">Recurring Plans</span>
+                    </a>
+
+                    @endif
+
+                    @if(auth()->user()?->hasPermission('daily_orders.view'))
+
+                    <a
+                        href="{{ route('admin.daily-orders.index') }}"
+                        class="nav-item {{ request()->routeIs('admin.daily-orders.*') ? 'active' : '' }}"
+                    >
+                        <span class="nav-icon">
+                            <svg viewBox="0 0 24 24">
+                                <rect x="4" y="5" width="16" height="15" rx="2"/>
+                                <path d="M8 3v4M16 3v4M4 10h16"/>
+                            </svg>
+                        </span>
+                        <span class="nav-label">Daily Orders</span>
+                    </a>
+
+                    @endif
 
             @endif
 

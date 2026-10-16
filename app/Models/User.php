@@ -51,17 +51,17 @@ class User extends Authenticatable
 
     public function hasRole(string $role): bool
     {
-        return $this->roles()->where('slug', $role)->exists();
+        return $this->roles()->where('is_active', true)->where('slug', $role)->exists();
     }
 
     public function hasAnyRole(array $roles): bool
     {
-        return $this->roles()->whereIn('slug', $roles)->exists();
+        return $this->roles()->where('is_active', true)->whereIn('slug', $roles)->exists();
     }
 
     public function hasPermission(string $permission): bool
     {
-        if ($this->hasRole('super-admin')) {
+        if ($this->roles()->where('is_active', true)->where('slug', 'super-admin')->exists()) {
             return true;
         }
 
@@ -74,6 +74,7 @@ class User extends Authenticatable
     public function permissionSlugs(): array
     {
         return $this->roles()
+            ->where('is_active', true)
             ->with('permissions:id,slug')
             ->get()
             ->pluck('permissions')
@@ -91,6 +92,6 @@ class User extends Authenticatable
 
     public function roleNames(): string
     {
-        return $this->roles()->pluck('name')->implode(', ');
+        return $this->roles()->where('is_active', true)->pluck('name')->implode(', ');
     }
 }

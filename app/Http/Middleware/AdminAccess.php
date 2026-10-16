@@ -29,8 +29,14 @@ class AdminAccess
                 ]);
         }
 
-        if (!auth()->user()->roles()->where('slug', '!=', 'customer')->exists()) {
+        $user = auth()->user();
+
+        if ($user->hasRole('customer')) {
             return redirect()->route('customer.main');
+        }
+
+        if (!$user->roles()->where('is_active', true)->where('slug', '!=', 'customer')->exists()) {
+            abort(403, 'No administrative role is assigned to this account.');
         }
 
         return $next($request);

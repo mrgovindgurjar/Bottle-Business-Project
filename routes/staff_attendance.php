@@ -4,7 +4,7 @@ use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\SalaryPaymentController;
 
-Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
+Route::prefix('admin')->name('admin.')->middleware('admin')->group(function () {
     Route::resource('staff', StaffController::class)->except(['show','destroy'])->names('staff');
     Route::get('staff/{staff}', [StaffController::class,'show'])->name('staff.show');
     Route::delete('staff/{staff}', [StaffController::class,'destroy'])->name('staff.destroy');

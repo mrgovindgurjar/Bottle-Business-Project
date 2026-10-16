@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Admin\Auth;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Validation\ValidationException;
 use App\Models\AuditLog;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
@@ -31,6 +33,14 @@ class AdminLoginController extends Controller
         ]);
 
         $remember = $request->boolean('remember');
+        $throttleKey = 'admin-login:' . strtolower(trim($credentials['login'])) . '|' . $request->ip();
+
+        if (RateLimiter::tooManyAttempts($throttleKey, 5)) {
+            $seconds = RateLimiter::availableIn($throttleKey);
+            throw ValidationException::withMessages([
+                'login' => 'Too many login attempts. Please try again in ' . ceil($seconds / 60) . ' minute(s).',
+            ]);
+        }
 
         $field = filter_var(
             $credentials['login'],
@@ -46,6 +56,8 @@ class AdminLoginController extends Controller
                 'is_active' => true,
             ], $remember)
         ) {
+            RateLimiter::hit($throttleKey, 60);
+
             return back()
                 ->withErrors([
                     'login' => 'Invalid login credentials.',
@@ -53,6 +65,7 @@ class AdminLoginController extends Controller
                 ->onlyInput('login');
         }
 
+        RateLimiter::clear($throttleKey);
         $request->session()->regenerate();
 
         if ($request->user()->hasRole('customer')) {

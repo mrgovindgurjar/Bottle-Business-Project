@@ -5,7 +5,7 @@
 @section('content')
 <div class="security-page">
     <div class="security-head">
-        <div><span class="security-eyebrow">SECURITY & ACCOUNTS</span><h1>Users</h1><p>Manage staff and customer login accounts.</p></div>
+        <div><span class="security-eyebrow">SECURITY & ACCOUNTS</span><h1>Users</h1><p>Manage internal staff and administrator login accounts.</p></div>
         @if(auth()->user()->hasPermission('users.create'))<a class="security-btn primary" href="{{ route('admin.security.users.create') }}">+ New User</a>@endif
     </div>
     <form class="security-filter" method="GET">
@@ -30,7 +30,7 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="5"><div class="security-empty"><strong>No users found</strong><span>Create your first staff/customer account.</span></div></td></tr>
+            <tr><td colspan="5"><div class="security-empty"><strong>No users found</strong><span>Create your first internal user account.</span></div></td></tr>
         @endforelse
         </tbody></table>
     </div>

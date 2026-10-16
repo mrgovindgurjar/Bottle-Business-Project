@@ -21,6 +21,10 @@
         </div>
     </div>
 
+    @can('export', App\Models\Lead::class)
+        <a href="{{ route('admin.leads.export', request()->query()) }}" class="btn btn-secondary">Export CSV</a>
+    @endcan
+
     <a
         href="{{ route('admin.leads.create') }}"
         class="btn btn-primary"

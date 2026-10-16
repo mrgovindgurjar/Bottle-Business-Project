@@ -14,6 +14,7 @@ class ProductPriceService
     public function create(Product $product, array $data): ProductPrice
     {
         return DB::transaction(function () use ($product, $data) {
+            Product::query()->whereKey($product->id)->lockForUpdate()->firstOrFail();
             $data['product_id'] = $product->id;
             $this->ensureNoOverlap($data);
             return ProductPrice::create($data);
@@ -23,6 +24,7 @@ class ProductPriceService
     public function update(ProductPrice $price, array $data): ProductPrice
     {
         return DB::transaction(function () use ($price, $data) {
+            Product::query()->whereKey($price->product_id)->lockForUpdate()->firstOrFail();
             $payload = array_merge($price->only([
                 'product_id', 'customer_id', 'pricing_type', 'min_quantity', 'max_quantity',
                 'unit_price', 'effective_from', 'effective_to', 'status',
@@ -36,7 +38,10 @@ class ProductPriceService
 
     public function deactivate(ProductPrice $price): void
     {
-        $price->update(['status' => 'inactive']);
+        DB::transaction(function () use ($price) {
+            Product::query()->whereKey($price->product_id)->lockForUpdate()->firstOrFail();
+            $price->update(['status' => 'inactive']);
+        });
     }
 
     public function findApplicablePrice(
@@ -96,7 +101,7 @@ class ProductPriceService
 
         foreach ($query->get() as $row) {
             $newMin = (int) $data['min_quantity'];
-            $newMax = $data['max_quantity'] !== null ? (int) $data['max_quantity'] : PHP_INT_MAX;
+            $newMax = ($data['max_quantity'] ?? null) !== null ? (int) $data['max_quantity'] : PHP_INT_MAX;
             $oldMin = (int) $row->min_quantity;
             $oldMax = $row->max_quantity !== null ? (int) $row->max_quantity : PHP_INT_MAX;
 
@@ -112,8 +117,8 @@ class ProductPriceService
 
     private function datesOverlap(array $data, ProductPrice $row): bool
     {
-        $newFrom = $data['effective_from'] ? \Carbon\Carbon::parse($data['effective_from'])->startOfDay() : null;
-        $newTo = $data['effective_to'] ? \Carbon\Carbon::parse($data['effective_to'])->endOfDay() : null;
+        $newFrom = !empty($data['effective_from']) ? \Carbon\Carbon::parse($data['effective_from'])->startOfDay() : null;
+        $newTo = !empty($data['effective_to']) ? \Carbon\Carbon::parse($data['effective_to'])->endOfDay() : null;
         $oldFrom = $row->effective_from ? $row->effective_from->copy()->startOfDay() : null;
         $oldTo = $row->effective_to ? $row->effective_to->copy()->endOfDay() : null;
 

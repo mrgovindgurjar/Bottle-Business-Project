@@ -3,7 +3,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 class UpdatePurchaseRequest extends FormRequest
 {
-    public function authorize(): bool { return $this->user()?->can('purchases.edit') ?? false; }
+    public function authorize(): bool { return $this->user()?->hasPermission('purchases.edit') ?? false; }
     public function rules(): array { return [
         'supplier_id'=>['required','integer','exists:suppliers,id'],'purchase_date'=>['required','date'],'expected_date'=>['nullable','date','after_or_equal:purchase_date'],
         'discount_type'=>['nullable','in:percent,fixed'],'discount_value'=>['nullable','numeric','min:0'],'tax_rate'=>['nullable','numeric','min:0','max:100'],

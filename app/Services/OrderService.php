@@ -175,24 +175,45 @@ class OrderService
             'cancelled' => [],
         ];
 
-        if (!in_array($status, $allowed[$order->status] ?? [], true)) {
-            throw ValidationException::withMessages(['order' => "Cannot move order from {$order->status} to {$status}."]);
-        }
+        return DB::transaction(function () use ($order, $status, $userId, $allowed) {
+            $locked = Order::query()->lockForUpdate()->findOrFail($order->id);
 
-        $payload = ['status' => $status];
-        if ($status === 'confirmed') {
-            $payload['confirmed_by'] = $userId;
-            $payload['confirmed_at'] = now();
-        }
-        if ($status === 'cancelled') {
-            $payload['cancelled_at'] = now();
-        }
+            if (!in_array($status, $allowed[$locked->status] ?? [], true)) {
+                throw ValidationException::withMessages([
+                    'order' => "Cannot move order from {$locked->status} to {$status}.",
+                ]);
+            }
 
-        $order->update($payload);
-        if ($status === 'confirmed') {
-            event(new \App\Events\OrderApproved());
-        }
-        return $order->fresh();
+            $oldStatus = $locked->status;
+            $payload = ['status' => $status];
+
+            if ($status === 'confirmed') {
+                $payload['confirmed_by'] = $userId;
+                $payload['confirmed_at'] = now();
+            }
+
+            if ($status === 'cancelled') {
+                $payload['cancelled_at'] = now();
+            }
+
+            $locked->update($payload);
+
+            if (class_exists(\App\Models\AuditLog::class)) {
+                \App\Models\AuditLog::record(
+                    'order.status_changed',
+                    $locked,
+                    ['status' => $oldStatus],
+                    ['status' => $status],
+                    'Order status changed'
+                );
+            }
+
+            if ($status === 'confirmed') {
+                event(new \App\Events\OrderApproved());
+            }
+
+            return $locked->fresh();
+        });
     }
 
     public function duplicate(Order $order, int $userId): Order

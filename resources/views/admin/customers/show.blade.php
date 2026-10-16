@@ -11,6 +11,19 @@
         </div>
         <div class="customer-profile-actions">
             @can('update', $customer)<a href="{{ route('admin.customers.edit', $customer) }}" class="btn btn-secondary">Edit Profile</a>@endcan
+            @if($customer->trashed())
+                @can('update', $customer)
+                    <form method="POST" action="{{ route('admin.customers.restore', $customer) }}">@csrf @method('PATCH')<button class="btn btn-primary" type="submit">Restore Customer</button></form>
+                @endcan
+            @else
+                @can('block', $customer)
+                    @if($customer->status !== 'blocked')
+                        <form method="POST" action="{{ route('admin.customers.status', $customer) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="blocked"><button class="btn btn-secondary" type="submit">Block</button></form>
+                    @else
+                        <form method="POST" action="{{ route('admin.customers.status', $customer) }}">@csrf @method('PATCH')<input type="hidden" name="status" value="active"><button class="btn btn-secondary" type="submit">Unblock</button></form>
+                    @endif
+                @endcan
+            @endif
             <a href="{{ route('admin.customers.index') }}" class="btn btn-primary">← Customers</a>
         </div>
     </div>

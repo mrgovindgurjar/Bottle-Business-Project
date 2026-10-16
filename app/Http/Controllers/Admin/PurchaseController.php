@@ -93,7 +93,8 @@ class PurchaseController extends Controller
     public function cancel(Purchase $purchase): RedirectResponse
     {
         $this->authorize('cancel',$purchase);
-        $purchase->update(['status'=>'cancelled']);
+        $service = app(SupplierPurchaseService::class);
+        $service->cancelPurchase($purchase);
         return back()->with('success','Purchase cancelled.');
     }
 

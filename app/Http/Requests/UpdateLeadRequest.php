@@ -5,6 +5,7 @@ namespace App\Http\Requests;
 use App\Models\Lead;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Models\User;
 
 class UpdateLeadRequest extends FormRequest
 {
@@ -88,7 +89,13 @@ class UpdateLeadRequest extends FormRequest
 
             'assigned_to' => [
                 'nullable',
-                'exists:users,id',
+                'integer',
+                function ($attribute, $value, $fail) {
+                    $user = User::with('roles')->find($value);
+                    if (!$user || !$user->is_active || $user->hasRole('customer')) {
+                        $fail('Selected executive is not available for lead assignment.');
+                    }
+                },
             ],
 
             'status' => [

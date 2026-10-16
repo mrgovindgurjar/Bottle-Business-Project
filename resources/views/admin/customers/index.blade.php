@@ -14,11 +14,16 @@
             <h1 class="page-title">Customers</h1>
             <div class="page-subtitle">Manage business accounts, contacts, addresses and customer relationships.</div>
         </div>
-        @can('create', App\Models\Customer::class)
-            <a href="{{ route('admin.customers.create') }}" class="btn btn-primary customer-primary-btn">
-                <span>＋</span> New Customer
-            </a>
-        @endcan
+        <div style="display:flex;gap:10px;align-items:center;justify-content:flex-end;flex-wrap:wrap;">
+            @can('export', App\Models\Customer::class)
+                <a href="{{ route('admin.customers.export', request()->query()) }}" class="btn btn-secondary">Export CSV</a>
+            @endcan
+            @can('create', App\Models\Customer::class)
+                <a href="{{ route('admin.customers.create') }}" class="btn btn-primary customer-primary-btn">
+                    <span>＋</span> New Customer
+                </a>
+            @endcan
+        </div>
     </div>
 
     <div class="customer-kpis">

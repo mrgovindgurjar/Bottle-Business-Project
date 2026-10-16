@@ -10,8 +10,7 @@ class StoreLeadActivityRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return $this->user()
-            ->can('activity', Lead::class);
+        return $this->user()?->hasPermission('leads.followup') ?? false;
     }
 
     public function rules(): array

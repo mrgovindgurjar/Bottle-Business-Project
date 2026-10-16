@@ -32,6 +32,11 @@ class ProductPolicy
         return $user->hasPermission('products.delete');
     }
 
+    public function export(User $user): bool
+    {
+        return $user->hasPermission('products.export');
+    }
+
     public function pricing(User $user, Product $product): bool
     {
         return $user->hasPermission('pricing.create')

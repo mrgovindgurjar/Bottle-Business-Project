@@ -1,5 +1,9 @@
 @extends('layouts.admin')
 @section('title','My Profile · JALVAN ERP')
+
+@push('styles')<link rel="stylesheet" href="{{ asset('css/security.css') }}">@endpush
+@push('scripts')<script src="{{ asset('js/security.js') }}"></script>@endpush
+
 @section('content')
 <div class="security-page"><div class="security-head"><div><span class="security-eyebrow">ACCOUNT</span><h1>My profile</h1><p>Manage your account information and password.</p></div></div>
 <div class="security-grid">

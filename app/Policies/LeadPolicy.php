@@ -7,65 +7,14 @@ use App\Models\User;
 
 class LeadPolicy
 {
-    public function viewAny(User $user): bool
-    {
-        return $user->hasPermission(
-            'leads.view'
-        );
-    }
-
-    public function view(
-        User $user,
-        Lead $lead
-    ): bool {
-        return $user->hasPermission(
-            'leads.view'
-        );
-    }
-
-    public function create(User $user): bool
-    {
-        return $user->hasPermission(
-            'leads.create'
-        );
-    }
-
-    public function update(
-        User $user,
-        Lead $lead
-    ): bool {
-        return $user->hasPermission(
-            'leads.edit'
-        );
-    }
-
-    public function delete(
-        User $user,
-        Lead $lead
-    ): bool {
-        return $user->hasPermission(
-            'leads.delete'
-        );
-    }
-
-    public function activity(User $user): bool
-    {
-        return $user->hasPermission(
-            'leads.activity'
-        );
-    }
-
-    public function status(User $user): bool
-    {
-        return $user->hasPermission(
-            'leads.status'
-        );
-    }
-
-    public function convert(User $user): bool
-    {
-        return $user->hasPermission(
-            'leads.convert'
-        );
-    }
+    public function viewAny(User $user): bool { return $user->hasPermission('leads.view'); }
+    public function view(User $user, Lead $lead): bool { return $user->hasPermission('leads.view'); }
+    public function create(User $user): bool { return $user->hasPermission('leads.create'); }
+    public function update(User $user, Lead $lead): bool { return $user->hasPermission('leads.edit'); }
+    public function delete(User $user, Lead $lead): bool { return $user->hasPermission('leads.delete'); }
+    public function activity(User $user, Lead $lead): bool { return $user->hasPermission('leads.followup'); }
+    public function status(User $user, Lead $lead): bool { return $user->hasPermission('leads.edit'); }
+    public function assign(User $user, Lead $lead): bool { return $user->hasPermission('leads.assign'); }
+    public function convert(User $user, Lead $lead): bool { return $user->hasPermission('leads.convert'); }
+    public function export(User $user): bool { return $user->hasPermission('leads.export'); }
 }

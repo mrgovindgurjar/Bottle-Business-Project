@@ -6,7 +6,10 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class StoreDeliveryRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool
+    {
+        return (bool) $this->user()?->hasPermission('deliveries.create');
+    }
 
     public function rules(): array
     {

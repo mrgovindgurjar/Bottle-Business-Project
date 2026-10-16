@@ -2,9 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\AuditLog;
 use App\Models\Customer;
 use App\Models\CustomerAddress;
-use App\Models\AuditLog;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -17,13 +17,14 @@ class CustomerService
         return DB::transaction(function () use ($data) {
             $plainPassword = $data['password'] ?? Str::random(12);
             $email = $data['email'] ?? $this->placeholderEmail();
+            $status = $data['status'] ?? Customer::STATUS_ACTIVE;
 
             $user = User::create([
                 'name' => $data['contact_name'],
                 'email' => $email,
                 'mobile' => $data['mobile'],
                 'password' => Hash::make($plainPassword),
-                'is_active' => true,
+                'is_active' => $status === Customer::STATUS_ACTIVE,
             ]);
 
             $customer = Customer::create([
@@ -41,15 +42,19 @@ class CustomerService
                 'state' => $data['state'] ?? null,
                 'pincode' => $data['pincode'] ?? null,
                 'source' => $data['source'] ?? null,
-                'status' => $data['status'] ?? Customer::STATUS_ACTIVE,
+                'status' => $status,
                 'notes' => $data['notes'] ?? null,
             ]);
 
             $this->assignCustomerRole($user);
-            AuditLog::record('customer.created', $customer, [], ['business_name'=>$customer->business_name,'customer_code'=>$customer->customer_code,'user_id'=>$user->id]);
+            AuditLog::record('customer.created', $customer, [], [
+                'business_name' => $customer->business_name,
+                'customer_code' => $customer->customer_code,
+                'user_id' => $user->id,
+            ]);
 
             return [
-                'customer' => $customer,
+                'customer' => $customer->load('user'),
                 'credentials' => [
                     'login' => $data['mobile'],
                     'email' => $email,
@@ -64,18 +69,18 @@ class CustomerService
     {
         return DB::transaction(function () use ($customer, $data) {
             $user = $customer->user;
+            $status = $data['status'] ?? $customer->status;
+            $before = $customer->only(['business_name', 'status', 'city', 'state', 'credit_limit', 'payment_terms_days']);
 
             $user->update([
                 'name' => $data['contact_name'],
                 'email' => $data['email'] ?? $user->email,
                 'mobile' => $data['mobile'],
-                'is_active' => ($data['status'] ?? $customer->status) !== Customer::STATUS_BLOCKED,
+                'is_active' => $status === Customer::STATUS_ACTIVE,
             ]);
 
             if (!empty($data['password'])) {
-                $user->update([
-                    'password' => Hash::make($data['password']),
-                ]);
+                $user->update(['password' => Hash::make($data['password'])]);
             }
 
             $customer->update([
@@ -91,12 +96,19 @@ class CustomerService
                 'state' => $data['state'] ?? null,
                 'pincode' => $data['pincode'] ?? null,
                 'source' => $data['source'] ?? null,
-                'status' => $data['status'] ?? $customer->status,
+                'status' => $status,
                 'notes' => $data['notes'] ?? null,
             ]);
 
             $fresh = $customer->fresh(['user']);
-            AuditLog::record('customer.updated', $fresh, [], ['business_name'=>$fresh->business_name,'status'=>$fresh->status]);
+            AuditLog::record('customer.updated', $fresh, $before, [
+                'business_name' => $fresh->business_name,
+                'status' => $fresh->status,
+                'city' => $fresh->city,
+                'state' => $fresh->state,
+                'credit_limit' => $fresh->credit_limit,
+                'payment_terms_days' => $fresh->payment_terms_days,
+            ]);
             return $fresh;
         });
     }
@@ -104,39 +116,58 @@ class CustomerService
     public function delete(Customer $customer): void
     {
         DB::transaction(function () use ($customer) {
-            $customer->update([
-                'status' => Customer::STATUS_INACTIVE,
-            ]);
-
-            $customer->user?->update([
-                'is_active' => false,
-            ]);
-
+            $customer->update(['status' => Customer::STATUS_INACTIVE]);
+            $customer->user?->update(['is_active' => false]);
             $customer->delete();
-            AuditLog::record('customer.deactivated', $customer, ['status'=>Customer::STATUS_ACTIVE], ['status'=>Customer::STATUS_INACTIVE]);
+            AuditLog::record('customer.deactivated', $customer, ['status' => Customer::STATUS_ACTIVE], ['status' => Customer::STATUS_INACTIVE]);
         });
     }
 
-    public function saveAddress(
-        Customer $customer,
-        array $data,
-        ?CustomerAddress $address = null
-    ): CustomerAddress {
+    public function restore(Customer $customer): void
+    {
+        DB::transaction(function () use ($customer) {
+            $customer->restore();
+            $customer->update(['status' => Customer::STATUS_ACTIVE]);
+            $customer->user?->update(['is_active' => true]);
+            AuditLog::record('customer.restored', $customer, ['status' => Customer::STATUS_INACTIVE], ['status' => Customer::STATUS_ACTIVE]);
+        });
+    }
+
+    public function setStatus(Customer $customer, string $status): Customer
+    {
+        return DB::transaction(function () use ($customer, $status) {
+            $old = $customer->status;
+            if ($status === Customer::STATUS_ACTIVE && $customer->trashed()) {
+                $customer->restore();
+            }
+            $customer->update(['status' => $status]);
+            $customer->user?->update(['is_active' => $status === Customer::STATUS_ACTIVE]);
+            AuditLog::record('customer.status_changed', $customer, ['status' => $old], ['status' => $status]);
+            return $customer->fresh(['user']);
+        });
+    }
+
+    public function saveAddress(Customer $customer, array $data, ?CustomerAddress $address = null): CustomerAddress
+    {
         return DB::transaction(function () use ($customer, $data, $address) {
-            $isDefault = (bool) ($data['is_default'] ?? false);
+            $isDefault = array_key_exists('is_default', $data)
+                ? (bool) $data['is_default']
+                : (bool) ($address?->is_default ?? !$customer->addresses()->exists());
 
             if ($isDefault) {
-                $customer->addresses()->update([
-                    'is_default' => false,
-                ]);
+                $customer->addresses()->update(['is_default' => false]);
             }
 
-            if ($address) {
-                $address->update($data);
-                return $address->fresh();
-            }
+            $data['is_default'] = $isDefault;
+            $result = $address
+                ? tap($address)->update($data)
+                : $customer->addresses()->create($data);
 
-            return $customer->addresses()->create($data);
+            AuditLog::record($address ? 'customer.address_updated' : 'customer.address_created', $result, [], [
+                'customer_id' => $customer->id,
+                'type' => $result->type,
+            ]);
+            return $result->fresh();
         });
     }
 
@@ -144,35 +175,31 @@ class CustomerService
     {
         $customer = $address->customer;
         $wasDefault = $address->is_default;
-
-        DB::transaction(function () use ($address) {
+        DB::transaction(function () use ($address, $customer, $wasDefault) {
             $address->delete();
+            if ($wasDefault) {
+                $customer->addresses()->latest('id')->first()?->update(['is_default' => true]);
+            }
+            AuditLog::record('customer.address_deleted', $address, ['customer_id' => $customer->id], []);
         });
+    }
 
-        if ($wasDefault) {
-            $customer->addresses()
-                ->latest('id')
-                ->first()
-                ?->update(['is_default' => true]);
-        }
+    public function setDefaultAddress(Customer $customer, CustomerAddress $address): void
+    {
+        DB::transaction(function () use ($customer, $address) {
+            $customer->addresses()->update(['is_default' => false]);
+            $address->update(['is_default' => true]);
+            AuditLog::record('customer.address_default_changed', $address, [], ['customer_id' => $customer->id]);
+        });
     }
 
     protected function assignCustomerRole(User $user): void
     {
-        $role = DB::table('roles')
-            ->where('slug', 'customer')
-            ->first();
-
+        $role = DB::table('roles')->where('slug', 'customer')->first();
         if ($role) {
             DB::table('user_roles')->updateOrInsert(
-                [
-                    'user_id' => $user->id,
-                    'role_id' => $role->id,
-                ],
-                [
-                    'created_at' => now(),
-                    'updated_at' => now(),
-                ]
+                ['user_id' => $user->id, 'role_id' => $role->id],
+                ['created_at' => now(), 'updated_at' => now()]
             );
         }
     }
@@ -181,8 +208,7 @@ class CustomerService
     {
         do {
             $code = 'CUS-' . now()->format('Ymd') . '-' . strtoupper(Str::random(4));
-        } while (Customer::where('customer_code', $code)->exists());
-
+        } while (Customer::withTrashed()->where('customer_code', $code)->exists());
         return $code;
     }
 
@@ -191,7 +217,6 @@ class CustomerService
         do {
             $email = 'customer.' . strtolower(Str::random(16)) . '@jalvan.local';
         } while (User::where('email', $email)->exists());
-
         return $email;
     }
 }

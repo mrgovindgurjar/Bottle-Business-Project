@@ -46,7 +46,7 @@ class ProductionController extends Controller
         $this->authorize('create', ProductionOrder::class);
         $order = Order::findOrFail($r->integer('order_id'));
         $p = $this->service->createFromOrder($order, (int) $r->user()->id);
-        $this->service->update($p, $r->validated());
+        $this->service->update($p, $r->validated(), (int) $r->user()->id);
         return redirect()->route('admin.production.show', $p)->with('success', 'Production job created successfully.');
     }
     public function show(ProductionOrder $production): View
@@ -69,7 +69,7 @@ class ProductionController extends Controller
         $p = $production;
         
         $this->authorize('update', $p);
-        $this->service->update($p, $r->validated());
+        $this->service->update($p, $r->validated(), (int) $r->user()->id);
         return back()->with('success', 'Production details updated.');
     }
     public function fromOrder(Order $order): RedirectResponse
@@ -101,7 +101,7 @@ class ProductionController extends Controller
 
         $this->authorize('progress', $p);
         $d = $r->validate(['produced_quantity' => ['required', 'numeric', 'gte:0'], 'rejected_quantity' => ['nullable', 'numeric', 'gte:0'], 'waste_quantity' => ['nullable', 'numeric', 'gte:0']]);
-        $this->service->updateProgress($p, $d);
+        $this->service->updateProgress($p, $d, (int) $r->user()->id);
         return back()->with('success', 'Production quantity updated.');
     }
     public function step(Request $r, ProductionOrder $production, ProductionStep $step): RedirectResponse
@@ -111,7 +111,7 @@ class ProductionController extends Controller
         $this->authorize('step', $p);
         abort_unless($step->production_order_id === $p->id, 404);
         $d = $r->validate(['status' => ['required', 'in:pending,in_progress,completed,skipped']]);
-        $this->service->updateStep($step, $d['status']);
+        $this->service->updateStep($step, $d['status'], (int) $r->user()->id);
         return back()->with('success', 'Production step updated.');
     }
     public function cancel(ProductionOrder $production): RedirectResponse
@@ -120,8 +120,6 @@ class ProductionController extends Controller
 
         $this->authorize('cancel', $p);
         $this->service->changeStatus($p, 'cancelled', (int) auth()->id());
-        if ($p->order && $p->order->status === 'in_production')
-            $p->order->update(['status' => 'on_hold']);
         return back()->with('success', 'Production cancelled.');
     }
 }

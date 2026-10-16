@@ -7,7 +7,7 @@ use Illuminate\Validation\Rule;
 
 class UpdateProductRequest extends FormRequest
 {
-    public function authorize(): bool { return true; }
+    public function authorize(): bool { return $this->user()?->hasPermission('products.edit') ?? false; }
 
     public function rules(): array
     {

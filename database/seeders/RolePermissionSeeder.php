@@ -63,6 +63,7 @@ class RolePermissionSeeder extends Seeder
                 'view',
                 'create',
                 'edit',
+                'delete',
                 'approve',
                 'reject',
                 'comment',
@@ -78,6 +79,8 @@ class RolePermissionSeeder extends Seeder
                 'approve',
                 'reject',
                 'convert',
+                'duplicate',
+                'print',
                 'export',
             ],
 
@@ -414,11 +417,15 @@ class RolePermissionSeeder extends Seeder
             'customers.edit',
 
             'products.view',
+            'products.export',
             'pricing.view',
+            'pricing.export',
 
             'designs.view',
             'designs.approve',
             'designs.reject',
+            'designs.delete',
+            'designs.export',
 
             'quotations.view',
             'quotations.create',
@@ -426,6 +433,9 @@ class RolePermissionSeeder extends Seeder
             'quotations.send',
             'quotations.approve',
             'quotations.convert',
+            'quotations.duplicate',
+            'quotations.print',
+            'quotations.export',
 
             'orders.view',
             'orders.create',
@@ -501,16 +511,20 @@ class RolePermissionSeeder extends Seeder
             'customers.edit',
 
             'products.view',
+            'products.export',
             'pricing.view',
 
             'designs.view',
             'designs.create',
             'designs.comment',
+            'designs.export',
 
             'quotations.view',
             'quotations.create',
             'quotations.edit',
             'quotations.send',
+            'quotations.duplicate',
+            'quotations.print',
 
             'orders.view',
             'orders.create',

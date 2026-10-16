@@ -85,7 +85,7 @@ class BatchController extends Controller
     public function update(UpdateBatchRequest $request, Batch $batch): RedirectResponse
     {
         $this->authorize('update', $batch);
-        $this->service->update($batch, $request->validated());
+        $this->service->update($batch, $request->validated(), (int) $request->user()->id);
         return back()->with('success', 'Batch updated successfully.');
     }
 
@@ -100,7 +100,7 @@ class BatchController extends Controller
     {
         $this->authorize('block', $batch);
         $data = $request->validate(['reason' => ['required', 'string', 'max:5000']]);
-        $this->service->block($batch, $data['reason']);
+        $this->service->block($batch, $data['reason'], (int) $request->user()->id);
         return back()->with('success', 'Batch blocked.');
     }
 

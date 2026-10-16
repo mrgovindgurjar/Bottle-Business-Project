@@ -1,10 +1,4 @@
 <?php
-
 namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-
-class DailyOrder extends Model
-{
-    //
-}
+use Illuminate\Database\Eloquent\Builder; use Illuminate\Database\Eloquent\Model; use Illuminate\Database\Eloquent\Relations\BelongsTo; use Illuminate\Database\Eloquent\Relations\HasMany;
+class DailyOrder extends Model { protected $fillable=['daily_order_number','recurring_plan_id','customer_id','order_id','scheduled_date','status','grand_total','delivery_address','delivery_city','delivery_state','delivery_pincode','generated_at','generated_by','notes']; protected $casts=['scheduled_date'=>'date','grand_total'=>'decimal:2','generated_at'=>'datetime']; public function plan():BelongsTo{return $this->belongsTo(RecurringPlan::class,'recurring_plan_id');} public function customer():BelongsTo{return $this->belongsTo(Customer::class);} public function order():BelongsTo{return $this->belongsTo(Order::class);} public function items():HasMany{return $this->hasMany(DailyOrderItem::class)->orderBy('sort_order');} public function generator():BelongsTo{return $this->belongsTo(User::class,'generated_by');} public function scopeSearch(Builder $q,?string $term):Builder{if(!$term)return $q;return $q->where(function($x)use($term){$x->where('daily_order_number','like',"%{$term}%")->orWhereHas('customer',fn($c)=>$c->where('business_name','like',"%{$term}%"));});}}

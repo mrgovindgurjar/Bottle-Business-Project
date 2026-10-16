@@ -24,6 +24,7 @@ class SecurityUserController extends Controller
         $this->authorizePermission($request, 'users.view');
 
         $users = User::query()
+            ->whereDoesntHave('roles', fn ($role) => $role->where('slug', 'customer'))
             ->with(['roles:id,name,slug', 'customer:id,user_id,business_name'])
             ->when($request->filled('q'), function ($q) use ($request) {
                 $term = trim($request->string('q')->toString());
@@ -62,6 +63,9 @@ class SecurityUserController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
+        $targetRole = Role::findOrFail((int) $data['role_id']);
+        $this->guardRoleAssignment($request->user(), null, $targetRole);
+
         DB::transaction(function () use ($data) {
             $user = User::create([
                 'name' => trim($data['name']),
@@ -80,6 +84,7 @@ class SecurityUserController extends Controller
     public function edit(Request $request, User $user)
     {
         $this->authorizePermission($request, 'users.edit');
+        $this->guardManagedUser($user);
         $roles = Role::where('is_active', true)->where('slug', '!=', 'customer')->orderBy('name')->get(['id', 'name', 'slug']);
         $user->load('roles:id,name,slug', 'roles.permissions:id,name,slug,module,action');
         return view('admin.security.users.edit', compact('user', 'roles'));
@@ -88,6 +93,7 @@ class SecurityUserController extends Controller
     public function update(Request $request, User $user)
     {
         $this->authorizePermission($request, 'users.edit');
+        $this->guardManagedUser($user);
 
         if ($request->user()->is($user) && !$request->boolean('is_active')) {
             return back()->withErrors(['is_active' => 'You cannot deactivate your own account.']);
@@ -101,6 +107,9 @@ class SecurityUserController extends Controller
             'is_active' => ['nullable', 'boolean'],
         ]);
 
+        $targetRole = Role::findOrFail((int) $data['role_id']);
+        $this->guardRoleAssignment($request->user(), $user, $targetRole);
+
         DB::transaction(function () use ($data, $user) {
             $user->update([
                 'name' => trim($data['name']),
@@ -108,6 +117,7 @@ class SecurityUserController extends Controller
                 'mobile' => $data['mobile'],
                 'is_active' => (bool) ($data['is_active'] ?? false),
             ]);
+            $user->roles()->sync([$data['role_id']]);
             AuditLog::record('user.updated', $user, [], ['name'=>$user->name,'email'=>$user->email,'role_id'=>$data['role_id'],'is_active'=>$user->is_active]);
         });
 
@@ -117,6 +127,7 @@ class SecurityUserController extends Controller
     public function resetPassword(Request $request, User $user)
     {
         $this->authorizePermission($request, 'users.reset-password');
+        $this->guardManagedUser($user);
 
         $data = $request->validate([
             'password' => ['required', 'confirmed', Password::defaults()],
@@ -128,16 +139,35 @@ class SecurityUserController extends Controller
         return back()->with('success', 'Password reset successfully.');
     }
 
+    private function guardManagedUser(User $user): void
+    {
+        abort_if($user->hasRole('customer'), 403, 'Customer accounts are managed from the Customer module.');
+    }
+
+    private function guardRoleAssignment(User $actor, ?User $targetUser, Role $targetRole): void
+    {
+        if ($targetRole->slug === 'customer') {
+            abort(403, 'Customer role cannot be assigned from admin user management.');
+        }
+
+        if ($targetRole->slug === 'super-admin' && !$actor->hasRole('super-admin')) {
+            abort(403, 'Only Super Admin can assign the Super Admin role.');
+        }
+
+        if ($targetUser?->hasRole('super-admin') && $targetRole->slug !== 'super-admin') {
+            abort(403, 'The Super Admin role cannot be removed from a Super Admin account.');
+        }
+    }
+
     public function destroy(Request $request, User $user)
     {
         $this->authorizePermission($request, 'users.delete');
+        $this->guardManagedUser($user);
 
         abort_if($request->user()->is($user), 422, 'You cannot delete your own account.');
 
-        if ($user->customer()->exists()) {
-            $user->update(['is_active' => false]);
-            AuditLog::record('user.deactivated', $user, ['is_active'=>true], ['is_active'=>false]);
-            return back()->with('success', 'Customer account has been deactivated.');
+        if ($user->hasRole('super-admin')) {
+            abort(403, 'Super Admin accounts cannot be deactivated from user management.');
         }
 
         $user->update(['is_active' => false]);

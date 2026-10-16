@@ -53,6 +53,7 @@ class SecurityRoleController extends Controller
     public function edit(Request $request, Role $role)
     {
         $this->authorizePermission($request, 'roles.edit');
+        $this->guardSystemRole($request, $role);
         $permissions = Permission::query()->orderBy('module')->orderBy('action')->get();
         $role->load('permissions:id,slug');
         return view('admin.security.roles.edit', compact('role', 'permissions'));
@@ -61,10 +62,19 @@ class SecurityRoleController extends Controller
     public function update(Request $request, Role $role)
     {
         $this->authorizePermission($request, 'roles.edit');
+        $this->guardSystemRole($request, $role);
         $data = $this->validated($request, $role);
 
         if ($role->slug === 'super-admin' && ($data['slug'] !== 'super-admin' || !($data['is_active'] ?? false))) {
             return back()->withErrors(['role' => 'The Super Admin role must remain active and keep its reserved slug.'])->withInput();
+        }
+
+        if ($role->slug === 'super-admin' && !$request->user()->hasRole('super-admin')) {
+            abort(403, 'Only Super Admin can modify the Super Admin role.');
+        }
+
+        if ($role->slug === 'customer' && ($data['slug'] !== 'customer' || !($data['is_active'] ?? false))) {
+            return back()->withErrors(['role' => 'The Customer role must remain active and keep its reserved slug.'])->withInput();
         }
 
         DB::transaction(function () use ($data, $role) {
@@ -85,8 +95,8 @@ class SecurityRoleController extends Controller
     {
         $this->authorizePermission($request, 'roles.delete');
 
-        if ($role->slug === 'super-admin') {
-            return back()->withErrors(['role' => 'The Super Admin role cannot be deleted.']);
+        if (in_array($role->slug, ['super-admin', 'customer'], true)) {
+            return back()->withErrors(['role' => 'System roles cannot be deleted.']);
         }
 
         if ($role->users()->exists()) {
@@ -96,6 +106,13 @@ class SecurityRoleController extends Controller
         $role->delete();
         AuditLog::record('role.deleted', $role, ['name'=>$role->name,'slug'=>$role->slug], []);
         return back()->with('success', 'Role deleted successfully.');
+    }
+
+    private function guardSystemRole(Request $request, Role $role): void
+    {
+        if (in_array($role->slug, ['super-admin', 'customer'], true) && !$request->user()->hasRole('super-admin')) {
+            abort(403, 'System roles can only be managed by Super Admin.');
+        }
     }
 
     private function validated(Request $request, ?Role $role = null): array

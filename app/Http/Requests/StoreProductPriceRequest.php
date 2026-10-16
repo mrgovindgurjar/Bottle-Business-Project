@@ -8,7 +8,7 @@ class StoreProductPriceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->hasPermission('pricing.create') ?? false;
     }
 
     public function rules(): array

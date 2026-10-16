@@ -65,7 +65,7 @@ class InventoryController extends Controller
     public function update(UpdateInventoryItemRequest $request,InventoryItem $inventory): RedirectResponse
     {
         $this->authorize('update',$inventory);
-        $this->service->updateItem($inventory,$request->validated());
+        $this->service->updateItem($inventory,$request->validated(),(int)$request->user()->id);
         return back()->with('success','Inventory item updated.');
     }
 

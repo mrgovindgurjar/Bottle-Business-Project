@@ -89,4 +89,9 @@ public function invoice(): HasMany
     return $this->hasMany(Invoice::class);
 }
 
+public function invoices(): HasMany
+{
+    return $this->hasMany(Invoice::class);
+}
+
 }

@@ -8,7 +8,7 @@ class UpdateProductPriceRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return $this->user()?->hasPermission('pricing.edit') ?? false;
     }
 
     public function rules(): array

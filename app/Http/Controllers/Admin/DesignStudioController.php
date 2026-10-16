@@ -103,7 +103,7 @@ class DesignStudioController extends Controller
         $this->authorize('update', $design);
         abort_unless($version->design_request_id === $design->id, 404);
         $request->validate(['logo' => ['required','file','mimes:png,jpg,jpeg,webp,svg','max:4096']]);
-        $this->service->uploadLogo($version, $request->file('logo'));
+        $this->service->uploadLogo($version, $request->file('logo'), (int) auth()->id());
         return back()->with('success','Logo uploaded.');
     }
 
@@ -120,7 +120,8 @@ class DesignStudioController extends Controller
         $updated = $this->service->uploadArtwork(
             $version,
             $request->file('front_artwork'),
-            $request->file('back_artwork')
+            $request->file('back_artwork'),
+            (int) auth()->id()
         );
 
         return response()->json([
@@ -134,7 +135,7 @@ class DesignStudioController extends Controller
     {
         $this->authorize('update', $design);
         abort_unless($version->design_request_id === $design->id, 404);
-        $this->service->submit($design, $version);
+        $this->service->submit($design, $version, (int) auth()->id());
         return back()->with('success','Design submitted for review.');
     }
 
@@ -151,7 +152,7 @@ class DesignStudioController extends Controller
     {
         $this->authorize('approve', $design);
         abort_unless($version->design_request_id === $design->id, 404);
-        $this->service->requestChanges($design, $version, $request->validated()['comment']);
+        $this->service->requestChanges($design, $version, $request->validated()['comment'], (int) auth()->id());
         return back()->with('success','Changes requested from this version.');
     }
 
@@ -159,7 +160,10 @@ class DesignStudioController extends Controller
     {
         $this->authorize('comment', $design);
         abort_unless($version->design_request_id === $design->id, 404);
-        $version->comments()->create(['user_id' => auth()->id(), 'type' => 'comment', 'comment' => $request->validated()['comment']]);
+        $comment = $version->comments()->create(['user_id' => auth()->id(), 'type' => 'comment', 'comment' => $request->validated()['comment']]);
+        if (class_exists(\App\Models\AuditLog::class)) {
+            \App\Models\AuditLog::record('commented', $version, null, ['comment_id' => $comment->id], 'Design comment added', (int) auth()->id());
+        }
         return back()->with('success','Comment added.');
     }
 }

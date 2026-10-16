@@ -14,9 +14,14 @@ Catalog / Products
             <h1 class="page-title">Products</h1>
             <div class="page-subtitle">Manage bottle formats, packaging specifications and commercial availability.</div>
         </div>
-        @if(auth()->user()->hasPermission('products.create'))
-            <a href="{{ route('admin.products.create') }}" class="btn btn-primary product-primary-btn">+ New Product</a>
-        @endif
+        <div style="display:flex;gap:8px;align-items:center;">
+            @if(auth()->user()->hasPermission('products.export'))
+                <a href="{{ route('admin.products.export', request()->query()) }}" class="btn btn-secondary">Export CSV</a>
+            @endif
+            @if(auth()->user()->hasPermission('products.create'))
+                <a href="{{ route('admin.products.create') }}" class="btn btn-primary product-primary-btn">+ New Product</a>
+            @endif
+        </div>
     </div>
 
     <div class="product-stats">

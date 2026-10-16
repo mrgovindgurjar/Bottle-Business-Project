@@ -7,6 +7,7 @@ use App\Http\Requests\StoreProductPriceRequest;
 use App\Http\Requests\UpdateProductPriceRequest;
 use App\Models\Product;
 use App\Models\ProductPrice;
+use App\Models\AuditLog;
 use App\Services\ProductPriceService;
 use Illuminate\Http\RedirectResponse;
 
@@ -21,7 +22,8 @@ class ProductPriceController extends Controller
     {
         $this->authorize('pricing', $product);
 
-        $this->priceService->create($product, $request->validated());
+        $price = $this->priceService->create($product, $request->validated());
+        AuditLog::record('pricing.created', $price, [], $price->only(['product_id','customer_id','pricing_type','min_quantity','max_quantity','unit_price','status']), 'Pricing rule created.');
 
         return back()->with('success', 'Price added successfully.');
     }
@@ -30,7 +32,9 @@ class ProductPriceController extends Controller
     {
         $this->authorize('pricing', $productPrice->product);
 
+        $before = $productPrice->only(['customer_id','pricing_type','min_quantity','max_quantity','unit_price','status']);
         $this->priceService->update($productPrice, $request->validated());
+        AuditLog::record('pricing.updated', $productPrice, $before, $productPrice->fresh()->only(['customer_id','pricing_type','min_quantity','max_quantity','unit_price','status']), 'Pricing rule updated.');
 
         return back()->with('success', 'Price updated successfully.');
     }
@@ -40,6 +44,7 @@ class ProductPriceController extends Controller
         $this->authorize('pricing', $productPrice->product);
 
         $this->priceService->deactivate($productPrice);
+        AuditLog::record('pricing.deactivated', $productPrice, ['status' => 'active'], ['status' => 'inactive'], 'Pricing rule deactivated.');
 
         return back()->with('success', 'Price deactivated successfully.');
     }
